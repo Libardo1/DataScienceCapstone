@@ -51,9 +51,8 @@ predicts the next word a user will type into a mobile device
         - Russian (RU)  
 - [Data Science Capstone project Github repository](https://github.com/datasciencespm/DataScienceCapstone/tree/master)  
 
-## Count the number of lines
+## Count the number of lines {.columns-2}
 ```{r, echo=FALSE, results='hide'}
-#  {.columns-2}
 baseTextFilePath <- "./Data/final"
 baseOutputDataPath <- "./OutputData"
 
@@ -72,12 +71,22 @@ for (curLanguage in dir(baseTextFilePath)) {
                           curOutputDatPath)
 }
 ```
+
 - English text documents # of lines:  
 ```{r loadENNumberOfLines, echo=FALSE, results='asis'}
+# http://blog.revolutionanalytics.com/2010/02/making-publicationready-tables-with-xtable.html
 load("./OutputData//en_US/en_USNumLines.RData")
 enNumLines = t(as.data.frame(num_lines))
 colnames(enNumLines) <- c("numberoflines")
 print(xtable(enNumLines),'html')
 rm(num_lines)
 ```
-- German text documents # of lines:
+    
+- German text documents # of lines:  
+```{r loadDENumberOfLines, echo=FALSE, results='asis'}
+load("./OutputData//de_DE/de_DENumLines.RData")
+enNumLines = t(as.data.frame(num_lines))
+colnames(enNumLines) <- c("numberoflines")
+print(xtable(enNumLines),'html')
+rm(num_lines)
+```
