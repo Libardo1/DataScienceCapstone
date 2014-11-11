@@ -12,6 +12,7 @@ output:
 # http://stackoverflow.com/questions/13090838/r-markdown-avoiding-package-loading-messages
 Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre1.8.0_20')
 
+library(Gmisc)
 library(rJava)
 library(RWeka)
 library(R.utils)
@@ -53,6 +54,7 @@ predicts the next word a user will type into a mobile device
 
 ## Count the number of lines {.columns-2}
 ```{r, echo=FALSE, results='hide'}
+#http://stackoverflow.com/questions/22871611/how-can-i-fix-column-breaks-in-an-rmarkdown-ioslides-presentation
 baseTextFilePath <- "./Data/final"
 baseOutputDataPath <- "./OutputData"
 
@@ -74,6 +76,7 @@ for (curLanguage in dir(baseTextFilePath)) {
 
 - German text documents # of lines:  
 ```{r loadDENumberOfLines, echo=FALSE, results='asis'}
+# http://gforge.se/2013/02/tables-from-r-into-word/
 load("./OutputData//de_DE/de_DENumLines.RData")
 num_lines = t(as.data.frame(num_lines))
 colnames(num_lines) <- c("numberoflines")
