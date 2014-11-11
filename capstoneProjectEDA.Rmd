@@ -9,11 +9,12 @@ output:
 ---  
 ## Introduction
 
-- The objective of the Data Science capsone project is to develop an application that
+- The objective of the Data Science Capstone project is to develop an application that
 predicts the next word a user will type into a mobile device
     - [Capstone Project Introduction](http://simplystatistics.org/2014/08/19/swiftkey-and-johns-hopkins-partner-for-data-science-specialization-capstone/)</br></br>
   
 -  The purpose of this presentation is to discuss the following topics:
-    - Summarize the statistics of the capstone project text data sets
-    - Describe unsual characteristics of this data
+    - Summarize the statistics of the Capstone project text data sets
+    - Describe unusual characteristics of this data</br></br>
 
+- [Data Science Capstone project Github repository](https://github.com/datasciencespm/DataScienceCapstone/tree/master)
