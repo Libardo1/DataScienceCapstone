@@ -72,21 +72,41 @@ for (curLanguage in dir(baseTextFilePath)) {
 }
 ```
 
+- German text documents # of lines:  
+```{r loadDENumberOfLines, echo=FALSE, results='asis'}
+load("./OutputData//de_DE/de_DENumLines.RData")
+num_lines = t(as.data.frame(num_lines))
+colnames(num_lines) <- c("numberoflines")
+print(xtable(num_lines),'html')
+rm(num_lines)
+```
+  
 - English text documents # of lines:  
 ```{r loadENNumberOfLines, echo=FALSE, results='asis'}
 # http://blog.revolutionanalytics.com/2010/02/making-publicationready-tables-with-xtable.html
 load("./OutputData//en_US/en_USNumLines.RData")
-enNumLines = t(as.data.frame(num_lines))
-colnames(enNumLines) <- c("numberoflines")
-print(xtable(enNumLines),'html')
+num_lines = t(as.data.frame(num_lines))
+colnames(num_lines) <- c("numberoflines")
+print(xtable(num_lines),'html')
 rm(num_lines)
 ```
     
-- German text documents # of lines:  
-```{r loadDENumberOfLines, echo=FALSE, results='asis'}
-load("./OutputData//de_DE/de_DENumLines.RData")
-enNumLines = t(as.data.frame(num_lines))
-colnames(enNumLines) <- c("numberoflines")
-print(xtable(enNumLines),'html')
+- Finnish text documents # of lines:
+```{r loadFINumberOfLines, echo=FALSE, results='asis'}
+# http://blog.revolutionanalytics.com/2010/02/making-publicationready-tables-with-xtable.html
+load("./OutputData//fi_FI/fi_FINumLines.RData")
+num_lines = t(as.data.frame(num_lines))
+colnames(num_lines) <- c("numberoflines")
+print(xtable(num_lines),'html')
+rm(num_lines)
+```
+  
+- Russian text documents # of lines:
+```{r loadRUNumberOfLines, echo=FALSE, results='asis'}
+# http://blog.revolutionanalytics.com/2010/02/making-publicationready-tables-with-xtable.html
+load("./OutputData//ru_RU/ru_RUNumLines.RData")
+num_lines = t(as.data.frame(num_lines))
+colnames(num_lines) <- c("numberoflines")
+print(xtable(num_lines),'html')
 rm(num_lines)
 ```
