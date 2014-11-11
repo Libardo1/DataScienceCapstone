@@ -17,6 +17,7 @@ library(RWeka)
 library(R.utils)
 library(tm)
 library(stringi)
+library(xtable)
 
 if (!file.exists("./Data/final")) {
     unzip("./Data/Coursera-SwiftKey.zip", exdir="./Data")   
@@ -37,16 +38,22 @@ source("./determineTextFileSize.R")
 
 - The objective of the Data Science Capstone project is to develop an application that
 predicts the next word a user will type into a mobile device
-    - [Capstone Project Introduction](http://simplystatistics.org/2014/08/19/swiftkey-and-johns-hopkins-partner-for-data-science-specialization-capstone/)</br></br>
-  
+    - [Capstone Project Introduction](http://simplystatistics.org/2014/08/19/swiftkey-and-johns-hopkins-partner-for-data-science-specialization-capstone/)  
 -  The purpose of this presentation is to discuss the following topics:
     - Summarize the statistics of the Capstone project text data sets
-    - Describe unusual characteristics of this data</br></br>
+    - Describe unusual characteristics of this data  
+- [An ISO 639-1 Language Code](http://www.w3schools.com/tags/ref_language_codes.asp)
+    - Two-character string that refers to a language
+    - Data Science Capstone project text data spans the following languages:  
+        - English (EN)  
+        - Finnish (FI)  
+        - Germain (DE)  
+        - Russian (RU)  
+- [Data Science Capstone project Github repository](https://github.com/datasciencespm/DataScienceCapstone/tree/master)  
 
-- [Data Science Capstone project Github repository](https://github.com/datasciencespm/DataScienceCapstone/tree/master)
-
-## Count the number of lines  
+## Count the number of lines
 ```{r, echo=FALSE, results='hide'}
+#  {.columns-2}
 baseTextFilePath <- "./Data/final"
 baseOutputDataPath <- "./OutputData"
 
@@ -65,3 +72,12 @@ for (curLanguage in dir(baseTextFilePath)) {
                           curOutputDatPath)
 }
 ```
+- English text documents # of lines:  
+```{r loadENNumberOfLines, echo=FALSE, results='asis'}
+load("./OutputData//en_US/en_USNumLines.RData")
+enNumLines = t(as.data.frame(num_lines))
+colnames(enNumLines) <- c("numberoflines")
+print(xtable(enNumLines),'html')
+rm(num_lines)
+```
+- German text documents # of lines:
