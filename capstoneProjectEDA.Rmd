@@ -7,6 +7,32 @@ output:
     widescreen: true
     smaller: true
 ---  
+
+```{r setupEnvironment, include=FALSE}
+# http://stackoverflow.com/questions/13090838/r-markdown-avoiding-package-loading-messages
+Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre1.8.0_20')
+
+library(rJava)
+library(RWeka)
+library(R.utils)
+library(tm)
+library(stringi)
+
+if (!file.exists("./Data/final")) {
+    unzip("./Data/Coursera-SwiftKey.zip", exdir="./Data")   
+    
+    # Profanity filter
+    profanityBlackListURL <-
+        paste0("http://www.frontgatemedia.com/new/wp-content/uploads/2014/03/",
+               "Terms-to-Block.csv")
+    
+    download.file(url = profanityBlackListURL,
+                  destfile="./Data/Terms-to-Block.csv")
+}
+
+source("./determineTextFileSize.R")
+```
+
 ## Introduction
 
 - The objective of the Data Science Capstone project is to develop an application that
@@ -18,3 +44,24 @@ predicts the next word a user will type into a mobile device
     - Describe unusual characteristics of this data</br></br>
 
 - [Data Science Capstone project Github repository](https://github.com/datasciencespm/DataScienceCapstone/tree/master)
+
+## Count the number of lines  
+```{r, echo=FALSE, results='hide'}
+baseTextFilePath <- "./Data/final"
+baseOutputDataPath <- "./OutputData"
+
+if (!file.exists(baseOutputDataPath)) {
+    dir.create(baseOutputDataPath)
+}
+
+for (curLanguage in dir(baseTextFilePath)) {
+    curOutputDatPath <- file.path(baseOutputDataPath, curLanguage)
+    
+    if (!file.exists(curOutputDatPath)) {
+        dir.create(curOutputDatPath)
+    }
+
+    determineTextFileSize(file.path(baseTextFilePath, curLanguage),
+                          curOutputDatPath)
+}
+```
