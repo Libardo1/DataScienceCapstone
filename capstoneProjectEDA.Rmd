@@ -77,12 +77,14 @@ for (curLanguage in dir(baseTextFilePath)) {
 - German text documents # of lines:
 ```{r loadDENumberOfLines, echo=FALSE, results='asis'}
 #http://stackoverflow.com/questions/23912707/how-to-format-gmischtmltable
+#http://gforge.se/2013/02/tables-from-r-into-word/
 load("./OutputData//de_DE/de_DENumLines.RData")
 num_lines = t(as.data.frame(num_lines))
 colnames(num_lines) <- c("numberoflines")
 cat(htmlTable(num_lines,
               headings=c("# of lines"),
-              rowlabel=c("textfile")))
+              rowlabel=c("textfile"),
+              ctable=TRUE))
 rm(num_lines)
 ```
 </br>
@@ -93,7 +95,8 @@ num_lines = t(as.data.frame(num_lines))
 colnames(num_lines) <- c("numberoflines")
 cat(htmlTable(num_lines,
               headings=c("# of lines"),
-              rowlabel=c("textfile")))
+              rowlabel=c("textfile"),
+              ctable=TRUE))
 rm(num_lines)
 ```
 </br>
@@ -104,7 +107,8 @@ num_lines = t(as.data.frame(num_lines))
 colnames(num_lines) <- c("numberoflines")
 cat(htmlTable(num_lines,
               headings=c("# of lines"),
-              rowlabel=c("textfile")))
+              rowlabel=c("textfile"),
+              ctable=TRUE))
 rm(num_lines)
 ```
 </br>
@@ -115,6 +119,7 @@ num_lines = t(as.data.frame(num_lines))
 colnames(num_lines) <- c("numberoflines")
 cat(htmlTable(num_lines,
               headings=c("# of lines"),
-              rowlabel=c("textfile")))
+              rowlabel=c("textfile"),
+              ctable=TRUE))
 rm(num_lines)
 ```
