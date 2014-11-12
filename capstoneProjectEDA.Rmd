@@ -80,6 +80,7 @@ for (curLanguage in dir(baseTextFilePath)) {
 #http://stackoverflow.com/questions/20200082/formatting-html-table-in-r
 #http://stackoverflow.com/questions/21291762/css-how-to-define-a-class-for-table-to-control-the-style-of-table-rows
 #http://www.w3schools.com/css/css_table.asp
+#http://cssmenumaker.com/blog/stylish-css-tables-tutorial
 load("./OutputData//de_DE/de_DENumLines.RData")
 num_lines = t(as.data.frame(num_lines))
 colnames(num_lines) <- c("# of lines")
