@@ -1,0 +1,19 @@
+.table-bordered table { 
+color: #333; /* Lighten up font color */
+font-family: Helvetica, Arial, sans-serif; /* Nicer font */
+width: 640px; 
+border-collapse: 
+collapse; border-spacing: 0; 
+}
+
+.table-bordered td, th { border: 1px solid #CCC; height: 30px; } /* Make cells a bit taller */
+
+.table-bordered th {
+background: #F3F3F3; /* Light grey background */
+font-weight: bold; /* Make sure they're bold */
+}
+
+.table-bordered td {
+background: #FAFAFA; /* Lighter grey background */
+text-align: center; /* Center our text */
+}

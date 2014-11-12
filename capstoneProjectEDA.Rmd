@@ -6,6 +6,7 @@ output:
   ioslides_presentation:
     widescreen: true
     smaller: true
+    css: styles.css
 ---  
 
 ```{r setupEnvironment, include=FALSE}
@@ -76,15 +77,15 @@ for (curLanguage in dir(baseTextFilePath)) {
 
 - German text documents # of lines:
 ```{r loadDENumberOfLines, echo=FALSE, results='asis'}
-#http://stackoverflow.com/questions/23912707/how-to-format-gmischtmltable
-#http://gforge.se/2013/02/tables-from-r-into-word/
+#http://stackoverflow.com/questions/20200082/formatting-html-table-in-r
+#http://stackoverflow.com/questions/21291762/css-how-to-define-a-class-for-table-to-control-the-style-of-table-rows
+#http://www.w3schools.com/css/css_table.asp
 load("./OutputData//de_DE/de_DENumLines.RData")
 num_lines = t(as.data.frame(num_lines))
-colnames(num_lines) <- c("numberoflines")
-cat(htmlTable(num_lines,
-              headings=c("# of lines"),
-              rowlabel=c("textfile"),
-              ctable=TRUE))
+colnames(num_lines) <- c("# of lines")
+print(xtable(t(num_lines)),
+      type="html",
+      html.table.attributes="class='table-bordered'")
 rm(num_lines)
 ```
 </br>
@@ -92,11 +93,10 @@ rm(num_lines)
 ```{r loadENNumberOfLines, echo=FALSE, results='asis'}
 load("./OutputData//en_US/en_USNumLines.RData")
 num_lines = t(as.data.frame(num_lines))
-colnames(num_lines) <- c("numberoflines")
-cat(htmlTable(num_lines,
-              headings=c("# of lines"),
-              rowlabel=c("textfile"),
-              ctable=TRUE))
+colnames(num_lines) <- c("# of lines")
+print(xtable(t(num_lines)),
+      type="html",
+      html.table.attributes="class='table-bordered'")
 rm(num_lines)
 ```
 </br>
@@ -104,11 +104,10 @@ rm(num_lines)
 ```{r loadFINumberOfLines, echo=FALSE, results='asis'}
 load("./OutputData//fi_FI/fi_FINumLines.RData")
 num_lines = t(as.data.frame(num_lines))
-colnames(num_lines) <- c("numberoflines")
-cat(htmlTable(num_lines,
-              headings=c("# of lines"),
-              rowlabel=c("textfile"),
-              ctable=TRUE))
+colnames(num_lines) <- c("# of lines")
+print(xtable(t(num_lines)),
+      type="html",
+      html.table.attributes="class='table-bordered'")
 rm(num_lines)
 ```
 </br>
@@ -116,10 +115,9 @@ rm(num_lines)
 ```{r loadRUNumberOfLines, echo=FALSE, results='asis'}
 load("./OutputData//ru_RU/ru_RUNumLines.RData")
 num_lines = t(as.data.frame(num_lines))
-colnames(num_lines) <- c("numberoflines")
-cat(htmlTable(num_lines,
-              headings=c("# of lines"),
-              rowlabel=c("textfile"),
-              ctable=TRUE))
+colnames(num_lines) <- c("# of lines")
+print(xtable(t(num_lines)),
+      type="html",
+      html.table.attributes="class='table-bordered'")
 rm(num_lines)
 ```
