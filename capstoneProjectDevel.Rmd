@@ -145,6 +145,26 @@ qplot(names(termFreqs),
       ylab="P(Bigram)") + coord_flip() + theme_gray(base_size=16)
 ```
 
+```{r trigram}
+#http://stackoverflow.com/questions/19615181/finding-ngrams-in-r-and-comparing-ngrams-across-corpora
+TrigramTokenizer <- 
+    function(x) {RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 3, max = 3))}
+
+tdmTri <- as.matrix(TermDocumentMatrix(lineCorpus, control = list(tokenize = TrigramTokenizer)))
+
+termFreqs <- sort(rowSums(tdmTri), decreasing=TRUE)
+termFreqs <- termFreqs / sum(termFreqs)
+termFreqs <- head(termFreqs, 20)
+
+qplot(names(termFreqs),
+      termFreqs,
+      main="Top 20 Trigrams",
+      geom="bar",
+      stat="identity",
+      xlab="Terms",
+      ylab="P(Trigram)") + coord_flip() + theme_gray(base_size=16)
+```
+
 ```{r }
 #http://stackoverflow.com/questions/12602652/how-to-count-the-number-of-sentences-in-a-text-in-r
 numberOfLinesToRead <- 1000
