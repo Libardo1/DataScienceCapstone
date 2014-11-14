@@ -16,6 +16,7 @@ library(R.utils)
 library(tm)
 library(stringi)
 library(xtable)
+library(ggplot2)
 ```
 
 ```{r defineTextFileRandomSampler, echo=FALSE}
@@ -34,11 +35,96 @@ sampleTextFileUnitTest(file.path(textFilePath, textFileName),
 
 ```{r generateENRandomSample}
 set.seed(1089165195)
-ouputTextFileDirectory <- "./OutputData//en_US"
+outputTextFileDirectory <- "./OutputData//en_US/"
 
-applyRandomSamplerToTextFiles("./Data/final//en_US",
-                              10,
-                              ouputTextFileDirectory)
+applyRandomSamplerToTextFiles("./Data/final//en_US/",
+                              1,
+                              outputTextFileDirectory)
+```
+
+```{r prototypeEDA}
+blackList <- read.csv("./Data/Terms-to-Block.csv",header=FALSE,skip=4)
+blackList <- blackList[,2]
+blackList <- gsub(",","",blackList)
+
+textFilePath <- outputTextFileDirectory
+num_lines <- list()
+
+for(curTextFile in dir(textFilePath, pattern = ".*1p00.*")) {
+    # http://www.inside-r.org/packages/cran/R.utils/docs/countLines
+    h_conn <- file(file.path(textFilePath, curTextFile), "rb")
+    num_lines[[curTextFile]] <- countLines(h_conn)
+    close(h_conn)
+}
+
+textFile <- "en_US.twitter1p00Percent.txt"
+
+# http://stackoverflow.com/questions/9934856/removing-non-ascii-characters-from-data-files
+# http://stackoverflow.com/questions/18153504/removing-non-english-text-from-corpus-in-r-using-tm
+removeNonASCII <-
+    content_transformer(function(x) iconv(x, "latin1", "ASCII", sub=""))
+
+converToLowerCase <- content_transformer(function(x) tolower(x))
+
+lines_to_read = min(ceiling(num_lines[[textFile]]/10), 10000)
+
+h_conn <- file(file.path(textFilePath, textFile), "r", blocking=FALSE)
+cur_chunk <- readLines(h_conn, lines_to_read, skipNul=TRUE)
+firstChunk <- TRUE
+
+repeat {
+    if (length(cur_chunk) == 0) {
+        break
+    }
+    else {
+        if (firstChunk) {
+            lineCorpus <- processDocumentChunk(cur_chunk, blackList)
+        }
+        else {
+            lineCorpus <- c(lineCorpus,
+                            processDocumentChunk(cur_chunk, blackList))
+        }
+    }
+
+    cur_chunk <- readLines(h_conn, lines_to_read, skipNul=TRUE)
+}
+close(h_conn)
+
+processDocumentChunk <- function(cur_chunk,
+                                 blackList) {
+    curChunkCorpus <- Corpus(VectorSource(cur_chunk))
+
+    curChunkCorpus <- tm_map(curChunkCorpus, removeNonASCII)
+
+    curChunkCorpus <- tm_map(curChunkCorpus, removePunctuation)
+
+    curChunkCorpus <- tm_map(curChunkCorpus, stripWhitespace)
+
+    curChunkCorpus <- tm_map(curChunkCorpus, converToLowerCase)
+
+    curChunkCorpus <- tm_map(curChunkCorpus, removeWords, blackList)    
+    
+    return (curChunkCorpus)
+}
+
+#http://stackoverflow.com/questions/15506118/make-dataframe-of-top-n-frequent-terms-for-multiple-corpora-using-tm-package-in
+tdm <- as.matrix(TermDocumentMatrix(lineCorpus))
+termFreqs <- sort(rowSums(tdm), decreasing=TRUE)
+termFreqs <- 100*(termFreqs / sum(termFreqs))
+termFreqs <- head(termFreqs, 20)
+
+# http://www.r-bloggers.com/using-r-barplot-with-ggplot2/
+qplot(names(termFreqs),
+      termFreqs,
+      main="Top 20 Terms",
+      geom="bar",
+      stat="identity",
+      xlab="Terms",
+      ylab="P(term) [%]") + coord_flip() + theme_gray(base_size=16)
+
+
+#http://beyondvalence.blogspot.com/2014/01/text-mining-4-performing-term.html
+
 ```
 
 ```{r }
@@ -56,7 +142,7 @@ blackList <- read.csv("./Data/Terms-to-Block.csv",header=FALSE,skip=4)
 blackList <- blackList[,2]
 blackList <- gsub(",","",blackList)
 
-englishText <- Corpus(DirSource(directory="./OutputData/en_US",
+textCorpus <- Corpus(DirSource(directory="./OutputData/en_US",
                                 pattern="*.txt"),
                       readerControl = list(reader = readPlain,
                                            language = "en",
@@ -67,21 +153,21 @@ englishText <- Corpus(DirSource(directory="./OutputData/en_US",
 removeNonASCII <-
     content_transformer(function(x) iconv(x, "latin1", "ASCII", sub=""))
 
-englishText <- tm_map(englishText, removeNonASCII)
+textCorpus <- tm_map(textCorpus, removeNonASCII)
 
-englishText <- tm_map(englishText, stripWhitespace)
+textCorpus <- tm_map(textCorpus, stripWhitespace)
 
 converToLowerCase <- content_transformer(function(x) tolower(x))
 
-englishText <- tm_map(englishText, converToLowerCase)
+textCorpus <- tm_map(textCorpus, converToLowerCase)
 
-englishText <- tm_map(englishText, removeWords, blackList)
+textCorpus <- tm_map(textCorpus, removeWords, blackList)
 
-cur_doc <- paste(as.character(englishText[[1]]),collapse="")
+cur_doc <- paste(as.character(textCorpus[[1]]),collapse="")
 
-#englishText <- tm_map(englishText, removePunctuation)
-#englishText <- tm_map(englishText, removeNumbers)
-#tdc <- TermDocumentMatrix(englishText, control = list(tokenize = WordTokenizer))
+#textCorpus <- tm_map(textCorpus, removePunctuation)
+#textCorpus <- tm_map(textCorpus, removeNumbers)
+#tdc <- TermDocumentMatrix(textCorpus, control = list(tokenize = WordTokenizer))
 
 # http://stackoverflow.com/questions/17703553/bigrams-instead-of-single-words-in-termdocument-matrix-using-r-and-rweka
 # http://stackoverflow.com/questions/8898521/finding-2-3-word-phrases-using-r-tm-package
