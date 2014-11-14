@@ -122,9 +122,27 @@ qplot(names(termFreqs),
       xlab="Terms",
       ylab="P(term) [%]") + coord_flip() + theme_gray(base_size=16)
 
-
 #http://beyondvalence.blogspot.com/2014/01/text-mining-4-performing-term.html
+```
 
+```{r bigram}
+# http://stackoverflow.com/questions/17703553/bigrams-instead-of-single-words-in-termdocument-matrix-using-r-and-rweka
+BigramTokenizer <- 
+    function(x) {RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 2, max = 2))}
+
+tdmBi <- as.matrix(TermDocumentMatrix(lineCorpus, control = list(tokenize = BigramTokenizer)))
+
+termFreqs <- sort(rowSums(tdmBi), decreasing=TRUE)
+termFreqs <- termFreqs / sum(termFreqs)
+termFreqs <- head(termFreqs, 20)
+
+qplot(names(termFreqs),
+      termFreqs,
+      main="Top 20 Bigrams",
+      geom="bar",
+      stat="identity",
+      xlab="Terms",
+      ylab="P(Bigram)") + coord_flip() + theme_gray(base_size=16)
 ```
 
 ```{r }
