@@ -1,0 +1,89 @@
+# http://stackoverflow.com/questions/9934856/removing-non-ascii-characters-from-data-files
+# http://stackoverflow.com/questions/18153504/removing-non-english-text-from-corpus-in-r-using-tm
+removeNonASCII <-
+    content_transformer(function(x) iconv(x, "latin1", "ASCII", sub=""))
+
+convertToLowerCase <- content_transformer(function(x) tolower(x))
+
+formLineCorpus <- function(textFilePath,
+                           textFile,
+                           blackList) {
+    #--------------------------------------------------------------------------
+    # This function forms a Corpus from a text document's lines
+    #
+    # Args:
+    #   textFilePath: String that stores the path to a directory where a text 
+    #                 file is located
+    #
+    #   textFile: String that stores the name of a text file
+    #
+    #   blackList: Character vector that stores a list of words to exclude from
+    #              from a line corpus
+    #
+    # Returns:
+    #   lineCorpus: tm R package Corpus object that contains a text document 
+    #               line corpus
+    #--------------------------------------------------------------------------    
+    lines_to_read = min(ceiling(num_lines[[textFile]]/10), 10000)
+    
+    h_conn <- file(file.path(textFilePath, textFile), "r", blocking=FALSE)
+    cur_chunk <- readLines(h_conn, lines_to_read, skipNul=TRUE)
+    firstChunk <- TRUE
+    
+    repeat {
+        if (length(cur_chunk) == 0) {
+            break
+        }
+        else {
+            if (firstChunk) {
+                lineCorpus <- processDocumentChunk(cur_chunk, blackList)
+            }
+            else {
+                # http://www.inside-r.org/packages/cran/tm/docs/c.Corpus
+                lineCorpus <- c(lineCorpus,
+                                processDocumentChunk(cur_chunk, blackList))
+            }
+        }
+        
+        cur_chunk <- readLines(h_conn, lines_to_read, skipNul=TRUE)
+    }
+    close(h_conn)
+    
+    return(lineCorpus)
+}
+
+processDocumentChunk <- function(cur_chunk,
+                                 blackList) {
+    #--------------------------------------------------------------------------
+    # This function applies the following set of transformations to a set of 
+    # text file lines:
+    #   - Removes non-ASCII characters
+    #   - Removes punctuation
+    #   - Removes whitespace
+    #   - Converts text to lower case
+    #   - Removes words contained in a "black list"
+    #
+    # Args:
+    #   cur_chunk: Character vector that stores a set of text file lines
+    #
+    #   blackList: Character vector that stores a list of words to exclude from
+    #              from a line corpus
+    #
+    # Returns:
+    #   curChunkCorpus: tm R package Corpus object that contains a corpus for
+    #                   a set of text file lines
+    #--------------------------------------------------------------------------
+    curChunkCorpus <- Corpus(VectorSource(cur_chunk))
+    
+    curChunkCorpus <- tm_map(curChunkCorpus, removeNonASCII)
+    
+    curChunkCorpus <- tm_map(curChunkCorpus, removePunctuation)
+    
+    curChunkCorpus <- tm_map(curChunkCorpus, stripWhitespace)
+    
+    curChunkCorpus <- tm_map(curChunkCorpus, convertToLowerCase)
+    
+    curChunkCorpus <- tm_map(curChunkCorpus, removeWords, blackList)    
+    
+    return (curChunkCorpus)
+}

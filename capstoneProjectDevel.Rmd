@@ -62,56 +62,15 @@ for(curTextFile in dir(textFilePath, pattern = ".*1p00.*")) {
 
 textFile <- "en_US.twitter1p00Percent.txt"
 
-# http://stackoverflow.com/questions/9934856/removing-non-ascii-characters-from-data-files
-# http://stackoverflow.com/questions/18153504/removing-non-english-text-from-corpus-in-r-using-tm
-removeNonASCII <-
-    content_transformer(function(x) iconv(x, "latin1", "ASCII", sub=""))
+source("./formLineCorpus.R")
 
-converToLowerCase <- content_transformer(function(x) tolower(x))
-
-lines_to_read = min(ceiling(num_lines[[textFile]]/10), 10000)
-
-h_conn <- file(file.path(textFilePath, textFile), "r", blocking=FALSE)
-cur_chunk <- readLines(h_conn, lines_to_read, skipNul=TRUE)
-firstChunk <- TRUE
-
-repeat {
-    if (length(cur_chunk) == 0) {
-        break
-    }
-    else {
-        if (firstChunk) {
-            lineCorpus <- processDocumentChunk(cur_chunk, blackList)
-        }
-        else {
-            lineCorpus <- c(lineCorpus,
-                            processDocumentChunk(cur_chunk, blackList))
-        }
-    }
-
-    cur_chunk <- readLines(h_conn, lines_to_read, skipNul=TRUE)
-}
-close(h_conn)
-
-processDocumentChunk <- function(cur_chunk,
-                                 blackList) {
-    curChunkCorpus <- Corpus(VectorSource(cur_chunk))
-
-    curChunkCorpus <- tm_map(curChunkCorpus, removeNonASCII)
-
-    curChunkCorpus <- tm_map(curChunkCorpus, removePunctuation)
-
-    curChunkCorpus <- tm_map(curChunkCorpus, stripWhitespace)
-
-    curChunkCorpus <- tm_map(curChunkCorpus, converToLowerCase)
-
-    curChunkCorpus <- tm_map(curChunkCorpus, removeWords, blackList)    
-    
-    return (curChunkCorpus)
-}
+lineCorpus <- list()
+lineCorpus[[textFile]] <- formLineCorpus(textFilePath,
+                                         textFile,
+                                         blackList)
 
 #http://stackoverflow.com/questions/15506118/make-dataframe-of-top-n-frequent-terms-for-multiple-corpora-using-tm-package-in
-tdm <- as.matrix(TermDocumentMatrix(lineCorpus))
+tdm <- as.matrix(TermDocumentMatrix(lineCorpus[[textFile]]))
 termFreqs <- sort(rowSums(tdm), decreasing=TRUE)
 termFreqs <- 100*(termFreqs / sum(termFreqs))
 termFreqs <- head(termFreqs, 20)
