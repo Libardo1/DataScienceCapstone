@@ -18,7 +18,9 @@ library(rJava)
 library(RWeka)
 library(R.utils)
 library(tm)
+library(stringr)
 library(stringi)
+library(textcat)
 library(xtable)
 
 if (!file.exists("./Data/final")) {
