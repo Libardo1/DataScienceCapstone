@@ -1,7 +1,8 @@
 sampleTextFile <- function(inputTextFilePath,
                            num_lines,
                            percentageToSample,
-                           outputTextFilePath) {
+                           outputTextFilePath,
+                           displayStatus=FALSE) {
     #--------------------------------------------------------------------
     # Generates a random sample of a text file and writes it to disk
     #
@@ -15,6 +16,10 @@ sampleTextFile <- function(inputTextFilePath,
     #
     #   outTextFilePath: Full path to the output text file that is a 
     #                    random sample of the input text file
+    #
+    #   displayStatus: Optional Boolean input that controls whether or not
+    #                  text document processing status is printed to the 
+    #                  status window
     #
     # Returns:
     #   sample_line_idx: Vector that stores which lines of the input
@@ -37,10 +42,12 @@ sampleTextFile <- function(inputTextFilePath,
     sample_line_idx <- numeric()
     file_subset <- character()
     
-    print("----------------------------------------------------------------")
-    print(sprintf("Generating random sample of %s",
-                  basename(inputTextFilePath)))
-    
+    if (displayStatus) {
+        print("--------------------------------------------------------------")
+        print(sprintf("Generating random sample of %s",
+                      basename(inputTextFilePath)))        
+    }
+
     h_conn <- file(inputTextFilePath, "r", blocking=FALSE)
     lines_read <- 0
     repeat {
@@ -61,9 +68,12 @@ sampleTextFile <- function(inputTextFilePath,
                                       cur_sample_line_idx + lines_read)
             
             lines_read <- lines_read + lines_to_read
-            print(sprintf("Lines read: %d (Out of %d)",
-                          lines_read,
-                          num_lines[[basename(inputTextFilePath)]][1]))
+            
+            if (displayStatus) {
+                print(sprintf("Lines read: %d (Out of %d)",
+                              lines_read,
+                              num_lines[[basename(inputTextFilePath)]][1]))
+            }
         }
     }
     close(h_conn)
@@ -163,7 +173,8 @@ sampleTextFileUnitTest <- function(textFilePath,
 
 applyRandomSamplerToTextFiles <- function(inputTextFileDirectory,
                                           percentageToSample,
-                                          ouputTextFileDirectory) {
+                                          outputTextFileDirectory,
+                                          displayStatus=FALSE) {
     #--------------------------------------------------------------------
     # Generates a random sample of each text file contained in a 
     # directory
@@ -174,32 +185,42 @@ applyRandomSamplerToTextFiles <- function(inputTextFileDirectory,
     #
     #   percentageToSample: Percentage of text file to randomly sample
     #
-    #   ouputTextFileDirectory: Full path to a directory that contains a 
+    #   outputTextFileDirectory: Full path to a directory that contains a 
     #                           random sample of a set of text files
+    #
+    #   displayStatus: Optional Boolean input that controls whether or not
+    #                  text document processing status is printed to the 
+    #                  status window
     #
     # Returns:
     #   None
     #--------------------------------------------------------------------
-    load(file=file.path(ouputTextFileDirectory,
-                        paste0(basename(ouputTextFileDirectory),
+    load(file=file.path(outputTextFileDirectory,
+                        paste0(basename(outputTextFileDirectory),
                                "NumLines.RData")))
     
+    textFileSampling <- list()
+
+    samplingStr = gsub("\\.","p",sprintf("%.2fPercent", percentageToSample))
+
     for(curTextFile in dir(inputTextFileDirectory, pattern="(.)*.txt")) {        
         print(sprintf("Generating a %.2f%% random sample of %s",
                       percentageToSample, curTextFile))
         
         curOutputFileName <- 
-            paste0(strsplit(curTextFile,"\\.txt"),
-                   gsub("\\.","p",sprintf("%.2fPercent",
-                                          percentageToSample)),
-                   ".txt")
-        
-        sample_line_idx <- 
+            paste0(strsplit(curTextFile,"\\.txt"),samplingStr,".txt")
+    
+        textFileSampling[[curOutputFileName]] <- 
             sampleTextFile(file.path(inputTextFileDirectory,
                                      curTextFile),
                            num_lines,
                            percentageToSample,
-                           file.path(ouputTextFileDirectory,
-                                     curOutputFileName))
+                           file.path(outputTextFileDirectory,
+                                     curOutputFileName),
+                           displayStatus)
     }
+    save(file=file.path(outputTextFileDirectory,
+                        paste0(basename(inputTextFileDirectory),
+                               samplingStr,'Sampling.RData')),
+         textFileSampling)
 }

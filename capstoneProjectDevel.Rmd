@@ -36,16 +36,42 @@ sampleTextFileUnitTest(file.path(textFilePath, textFileName),
                        10)
 ```
 
-```{r generateENRandomSample}
+```{r languageDetection}
+textDocumentLanguages <- c("english",
+                           "finnish",
+                           "german",
+                           "russian-iso8859_5",
+                           "russian-koi8_r",
+                           "russian-windows1251")
+
+profileDb <- TC_byte_profiles[names(TC_byte_profiles) %in% 
+                              textDocumentLanguages]
+
+lines_to_read <- 1000
+inputTextFilePath <- "./OutputData//en_US/en_US.blogs1p00Percent.txt"
+h_conn <- file(inputTextFilePath, "r", blocking=FALSE)
+cur_chunk <- readLines(h_conn, lines_to_read, skipNul=TRUE)
+close(h_conn)
+
+cur_chunk <- str_trim(iconv(cur_chunk,"latin1","ASCII",sub=""))
+
+textFileLanguage <- "english"
+
+curChunkLanguage <- textcat(cur_chunk, p = my.profiles)
+
+validLanguageIdx <- which(!grepl(paste0(textFileLanguage,"[a-z0-9_]*"),
+                                curChunkLanguage))
+```
+
+```{r prototypeEDA}
 set.seed(1089165195)
 outputTextFileDirectory <- "./OutputData//en_US/"
 
 applyRandomSamplerToTextFiles("./Data/final//en_US/",
                               1,
-                              outputTextFileDirectory)
-```
+                              outputTextFileDirectory,
+                              TRUE)
 
-```{r prototypeEDA}
 blackList <- read.csv("./Data/Terms-to-Block.csv",header=FALSE,skip=4)
 blackList <- blackList[,2]
 blackList <- gsub(",","",blackList)
@@ -67,7 +93,9 @@ source("./formLineCorpus.R")
 lineCorpus <- list()
 lineCorpus[[textFile]] <- formLineCorpus(textFilePath,
                                          textFile,
-                                         blackList)
+                                         "english",
+                                         blackList,
+                                         TRUE)
 
 #http://stackoverflow.com/questions/15506118/make-dataframe-of-top-n-frequent-terms-for-multiple-corpora-using-tm-package-in
 tdm <- as.matrix(TermDocumentMatrix(lineCorpus[[textFile]]))
