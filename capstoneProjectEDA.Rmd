@@ -34,6 +34,7 @@ if (!file.exists("./Data/final")) {
 }
 
 source("./determineTextFileSize.R")
+source("./determineWordCount.R")
 ```
 
 ## Introduction
@@ -64,14 +65,22 @@ if (!file.exists(baseOutputDataPath)) {
 }
 
 for (curLanguage in dir(baseTextFilePath)) {
-    curOutputDatPath <- file.path(baseOutputDataPath, curLanguage)
+    curOutputDataPath <- file.path(baseOutputDataPath, curLanguage)
     
-    if (!file.exists(curOutputDatPath)) {
-        dir.create(curOutputDatPath)
+    if (!file.exists(curOutputDataPath)) {
+        dir.create(curOutputDataPath)
     }
 
     determineTextFileSize(file.path(baseTextFilePath, curLanguage),
-                          curOutputDatPath)
+                          curOutputDataPath)
+    
+    load(file.path(baseOutputDataPath,
+                   curLanguage,
+                   paste0(curLanguage,"NumLines.RData")))
+        
+    determineWordCount(file.path(baseTextFilePath, curLanguage),
+                       curOutputDataPath,
+                       num_lines)
 }
 ```
 
@@ -122,3 +131,30 @@ print(xtable(t(num_lines)),
       html.table.attributes="class='table-bordered'")
 rm(num_lines)
 ```
+
+## Count the number of words {.columns-2}
+```{r, echo=FALSE, results='hide'}
+#http://stackoverflow.com/questions/22871611/how-can-i-fix-column-breaks-in-an-rmarkdown-ioslides-presentation
+if (!file.exists(baseOutputDataPath)) {
+    dir.create(baseOutputDataPath)
+}
+
+for (curLanguage in dir(baseTextFilePath)) {
+    curOutputDataPath <- file.path(baseOutputDataPath, curLanguage)
+    
+    load(file.path(baseOutputDataPath,
+                   curLanguage,
+                   paste0(curLanguage,"NumLines.RData")))
+        
+    determineWordCount(file.path(baseTextFilePath, curLanguage),
+                       curOutputDataPath,
+                       num_lines)
+}
+```
+- German text documents # of words:
+
+- English text documents # of words:
+
+- Finnish text documents # of words:
+
+- Russian text documents # of words:
