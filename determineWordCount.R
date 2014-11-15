@@ -20,9 +20,8 @@ countTextFileWords <- function(textFilePath,
     lines_to_read = min(ceiling(num_lines[[textFile]]/10), 10000)
     
     # http://stackoverflow.com/questions/15532810/reading-40-gb-csv-file-into-r-using-bigmemory?lq=1
-    # http://stackoverflow.com/questions/7260657/how-to-read-whitespace-delimited-strings-until-eof-in-r
-    # http://www.r-bloggers.com/counting-the-number-of-words-in-a-latex-file-with-stringi/
     # http://stackoverflow.com/questions/9934856/removing-non-ascii-characters-from-data-files
+    # http://www.r-bloggers.com/counting-the-number-of-words-in-a-latex-file-with-stringi/
     h_conn <- file(file.path(textFilePath, textFile), "r", blocking=FALSE)
     cur_chunk <- readLines(h_conn, lines_to_read, skipNul=TRUE)
     firstChunk <- TRUE

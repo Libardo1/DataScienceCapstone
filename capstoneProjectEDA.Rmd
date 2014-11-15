@@ -71,9 +71,9 @@ predicts the next word a user will type into a mobile device
     - [Stanford Information Retrieval textbook language models summary](http://nlp.stanford.edu/IR-book/html/htmledition/types-of-language-models-1.html)
 
 ## Count the number of lines 
-- Approach for counting lines
+- Approach for counting the number of lines
     - Call R.utils [`countLines`](http://www.inside-r.org/packages/cran/R.utils/docs/countLines) function
-    - Store number of text file lines in a list
+    - Store number of text file lines in a list that is written to disk
     - [R script source code](https://github.com/datasciencespm/DataScienceCapstone/blob/master/determineTextFileSize.R)  
 - Results presentation
     - [Format HTML table in R](http://stackoverflow.com/questions/20200082/formatting-html-table-in-r)
@@ -158,6 +158,15 @@ print(xtable(t(num_lines)),
       html.table.attributes="class='table-bordered'")
 rm(num_lines)
 ```
+
+## Count the number of words
+- Approach for counting the number of lines
+    - [Read the text file into memory in chunks](http://stackoverflow.com/questions/15532810/reading-40-gb-csv-file-into-r-using-bigmemory?lq=1)  
+    - [Remove non-ASCII character from text](http://stackoverflow.com/questions/9934856/removing-non-ascii-characters-from-data-files)
+    - [Count the number of words using the stringi R package `stri_stats_latex` function](http://www.r-bloggers.com/counting-the-number-of-words-in-a-latex-file-with-stringi/)  
+    - Store the text file word count in a list that is written to disk
+    - Present results in the same format at the number of lines / text file
+    - [R script source code](https://github.com/datasciencespm/DataScienceCapstone/blob/master/determineWordCount.R)
 
 ## Count the number of words {.columns-2}
 ```{r, echo=FALSE, results='hide'}
