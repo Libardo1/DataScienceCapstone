@@ -52,7 +52,23 @@ predicts the next word a user will type into a mobile device
         - Finnish (FI)  
         - Germain (DE)  
         - Russian (RU)  
-- [Data Science Capstone project Github repository](https://github.com/datasciencespm/DataScienceCapstone/tree/master)  
+- The source code for this presentation has been uploaded to Github
+    - [Data Science Capstone project Github repository](https://github.com/datasciencespm/DataScienceCapstone/tree/master)  
+
+## Introduction
+- This presentation will discuss the following summary statistics
+    - Number of lines in each text file
+    - Number of words in each text file
+    - Word feature analysis
+
+- There are three language models evaluated in this report
+    - Unigram
+        - Single word features
+    - Bigram
+        - Word pairs
+    - Trigram
+        - Three word segment
+    - [Stanford Information Retrieval textbook language models summary](http://nlp.stanford.edu/IR-book/html/htmledition/types-of-language-models-1.html)
 
 ## Count the number of lines {.columns-2}
 ```{r, echo=FALSE, results='hide'}
