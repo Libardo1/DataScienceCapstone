@@ -70,6 +70,17 @@ predicts the next word a user will type into a mobile device
         - Three word segment
     - [Stanford Information Retrieval textbook language models summary](http://nlp.stanford.edu/IR-book/html/htmledition/types-of-language-models-1.html)
 
+## Count the number of lines 
+- Approach for counting lines
+    - Call R.utils [`countLines`](http://www.inside-r.org/packages/cran/R.utils/docs/countLines) function
+    - Store number of text file lines in a list
+    - [R script source code](https://github.com/datasciencespm/DataScienceCapstone/blob/master/determineTextFileSize.R)  
+- Results presentation
+    - [Format HTML table in R](http://stackoverflow.com/questions/20200082/formatting-html-table-in-r)
+    - [Configure HTML table style using a Cascading Style Sheet (CSS)](http://stackoverflow.com/questions/21291762/css-how-to-define-a-class-for-table-to-control-the-style-of-table-rows)  
+    - [HTML CSS Syntax](http://www.w3schools.com/css/css_table.asp)  
+    - ["Stylish CSS Tables Tutorial"](http://cssmenumaker.com/blog/stylish-css-tables-tutorial)  
+
 ## Count the number of lines {.columns-2}
 ```{r, echo=FALSE, results='hide'}
 #http://stackoverflow.com/questions/22871611/how-can-i-fix-column-breaks-in-an-rmarkdown-ioslides-presentation
