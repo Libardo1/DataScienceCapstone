@@ -1,0 +1,88 @@
+---
+title: "generateWordFeatures"
+author: "mspcvsp"
+date: "Sunday, November 16, 2014"
+output: html_document
+---
+
+```{r setupEnvironment, include=FALSE}
+# http://stackoverflow.com/questions/13090838/r-markdown-avoiding-package-loading-messages
+Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre1.8.0_20')
+
+library(ggplot2)
+library(Gmisc)
+library(rJava)
+library(RWeka)
+library(R.utils)
+library(stringi)
+library(stringr)
+library(textcat)
+library(tm)
+library(xtable)
+
+if (!file.exists("./Data/final")) {
+    unzip("./Data/Coursera-SwiftKey.zip", exdir="./Data")   
+    
+    # Profanity filter
+    profanityBlackListURL <-
+        paste0("http://www.c.com/new/wp-content/uploads/2014/03/",
+               "Terms-to-Block.csv")
+    
+    download.file(url = profanityBlackListURL,
+                  destfile="./Data/Terms-to-Block.csv")
+}
+
+blackList <- read.csv("./Data/Terms-to-Block.csv",header=FALSE,skip=4)
+blackList <- blackList[,2]
+blackList <- gsub(",","",blackList)
+
+source("./generateFeatures.R")
+source("./initializeSamplingString.R")
+source("./initializeSampledTextFileRegex.R")
+```
+
+```{r}
+load("./OutputData//en_US/en_USNumLines.RData")
+textFilePath <- "./Data/final/en_US"
+
+featureParams <- list("textFilePath"=textFilePath,
+                      "textFileLanguage"="english",
+                      "num_lines"=num_lines,
+                      "percentageToSample"=10,
+                      "blacklist"=blackList)
+rm(blackList)
+
+samplingStr <- initializeSamplingString(featureParams$percentageToSample)
+
+sampledTextFileRegex <- 
+    initializeSampledTextFileRegex(featureParams$percentageToSample)
+
+outputTextFileDirectory <- "./OutputData//en_US/"
+wordFeatures <- list()
+
+for (curTextFile in dir(textFilePath, pattern="*.txt")) {
+    featureParams$textFile = curTextFile
+    
+    curWordFeatures <- generateFeatures(featureParams, TRUE)
+    
+    if (length(names(wordFeatures)) == 0) {
+        wordFeatures <- curWordFeatures
+    }
+    else {
+        wordFeatures$wordFreqs <- c(wordFeatures$wordFreqs,
+                                    curWordFeatures$wordFreqs)
+        
+        wordFeatures$bigramFreqs <- c(wordFeatures$bigramFreqs,
+                                      curWordFeatures$bigramFreqs)
+        
+        wordFeatures$trigramFreqs <- c(wordFeatures$trigramFreqs,
+                                      curWordFeatures$trigramFreqs)
+    }
+}
+save(file=file.path(outputTextFileDirectory,
+                    paste0(basename(outputTextFileDirectory),
+                           samplingStr,
+                           "WordFeatures.RData")), wordFeatures)
+```
+
+
