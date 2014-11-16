@@ -29,7 +29,7 @@ if (!file.exists("./Data/final")) {
     
     # Profanity filter
     profanityBlackListURL <-
-        paste0("http://www.frontgatemedia.com/new/wp-content/uploads/2014/03/",
+        paste0("http://www.c.com/new/wp-content/uploads/2014/03/",
                "Terms-to-Block.csv")
     
     download.file(url = profanityBlackListURL,
@@ -241,7 +241,29 @@ print(xtable(t(num_words)),
 rm(num_words)
 ```
 
-## Unique Word Cumulative Distribution Function    
+## Word Feature Characterization
+- Sample text documents
+    - [Read large text file into memory](http://stackoverflow.com/questions/15532810/reading-40-gb-csv-file-into-r-using-bigmemory?lq=1)
+- Form a collection of documents (i.e. `Corpus`) from text file lines
+    - Input is a randomly sampled percentage of the original text files
+        - No correspondence between lines  
+    - Read text data N lines at a time
+        - Avoids running out of memory
+    - Remove non-ASCII characters from text file lines
+        - [Remove non-ASCII characters from text data](http://stackoverflow.com/questions/9934856/removing-non-ascii-characters-from-data-files)  
+        - [Remove non-ASCII characters from corpus](http://stackoverflow.com/questions/18153504/removing-non-english-text-from-corpus-in-r-using-tm)  
+    - Detect and remove non-english language text
+        - [Segment text language using textcat R package](http://stackoverflow.com/questions/24099098/language-detection-in-r-with-the-textcat-package-how-to-restrict-to-a-few-lang)  
+        
+## Word Feature Characterization  
+- Form a collection of documents (i.e. `Corpus`) from text file lines (cont.)
+    - Apply the following transformations to the text data
+         - Remove punctuation 
+         - Remove [whitespace](http://www.w3.org/TR/html401/struct/text.html)
+         - Convert text to lower case
+         - Remove profane words contained in a ["black list"](http://www.frontgatemedia.com/a-list-of-723-bad-words-to-blacklist-and-how-to-use-facebooks-moderation-tool/)
+
+## Unique Word Cumulative Distribution Function  
 ```{r initializeLineCorpusConstruction, echo=FALSE, results='hide'}
 set.seed(1089165195)
 outputTextFileDirectory <- "./OutputData//en_US/"
