@@ -42,15 +42,15 @@ source("./initializeSampledTextFileRegex.R")
 ```
 
 ```{r}
+set.seed(1089165195)
 load("./OutputData//en_US/en_USNumLines.RData")
 textFilePath <- "./Data/final/en_US"
 
 featureParams <- list("textFilePath"=textFilePath,
                       "textFileLanguage"="english",
                       "num_lines"=num_lines,
-                      "percentageToSample"=10,
+                      "percentageToSample"=60,
                       "blacklist"=blackList)
-rm(blackList)
 
 samplingStr <- initializeSamplingString(featureParams$percentageToSample)
 
