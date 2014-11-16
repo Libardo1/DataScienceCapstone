@@ -356,3 +356,30 @@ qplot(names(termFreqsTopTwenty),
       xlab="Terms",
       ylab="P(term) [%]") + coord_flip() + theme_gray(base_size=16)
 ```
+
+## Bigram Distribution  
+- This bar chart illustrates the top twenty word pairs (i.e. 'bigrams') in a 
+`r percentageToSample`% sample of the english language text files  
+
+```{r plotTopTwentyBigrams, echo=FALSE, results='hide', fig.height=4.5, fig.width=7, fig.align='center'}
+BigramTokenizer <- function(x) {
+    RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 2, max = 2))
+}
+
+tdmBi <- 
+    as.matrix(TermDocumentMatrix(combinedCorpus,
+                                 control = list(tokenize = BigramTokenizer)))
+
+bigramFreqs <- sort(rowSums(tdmBi), decreasing=TRUE)
+bigramFreqs <- 100*bigramFreqs / sum(bigramFreqs)
+bigramFreqs <- head(bigramFreqs, 20)
+
+qplot(names(bigramFreqs),
+      bigramFreqs,
+      main="Top 20 Bigrams",
+      geom="bar",
+      stat="identity",
+      xlab="Terms",
+      ylab="P(Bigram)") + coord_flip() + theme_gray(base_size=16)
+```
+  
