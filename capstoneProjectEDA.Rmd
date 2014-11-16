@@ -279,11 +279,11 @@ percentageToSample <- 1
 ## Word Feature Characterization  
 - Word feature analysis (cont.)  
     - [Text arrow graph annotation](http://rpsychologist.com/creating-a-typical-textbook-illustration-of-statistical-power-using-either-ggplot-or-base-graphics)  
-    - [Construct data frame that contains the most frequency words in a Corpus](http://stackoverflow.com/questions/15506118/make-dataframe-of-top-n-frequent-terms-for-multiple-corpora-using-tm-package-in)  
+    - [Construct data frame that contains the most frequency words in a corpus](http://stackoverflow.com/questions/15506118/make-dataframe-of-top-n-frequent-terms-for-multiple-corpora-using-tm-package-in)  
     - [Term Frequency visualization](http://beyondvalence.blogspot.com/2014/01/text-mining-4-performing-term.html)  
-       - [Term Document Matrix](http://beyondvalence.blogspot.com/2014/01/text-mining-3-stemming-text-and.html)  
-    - [Rweka R package syntax for computing bigram Term Document Matrix](http://stackoverflow.com/questions/17703553/bigrams-instead-of-single-words-in-termdocument-matrix-using-r-and-rweka)  
-    - [Rweka R package syntax for computing trigram Term Document Matrix](http://stackoverflow.com/questions/19615181/finding-ngrams-in-r-and-comparing-ngrams-across-corpora)  
+        - [Term Document Matrix (TDM)](http://beyondvalence.blogspot.com/2014/01/text-mining-3-stemming-text-and.html)  
+    - [Rweka R package syntax for computing a bigram TDM](http://stackoverflow.com/questions/17703553/bigrams-instead-of-single-words-in-termdocument-matrix-using-r-and-rweka)  
+    - [Rweka R package syntax for computing a trigram TDM](http://stackoverflow.com/questions/19615181/finding-ngrams-in-r-and-comparing-ngrams-across-corpora)  
 - Word feature analysis R scripts
     - [Sample text file]
 
