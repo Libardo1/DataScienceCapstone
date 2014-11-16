@@ -380,7 +380,7 @@ bigramFreqsBottomTwenty <- tail(bigramFreqs, 20)
 
 qplot(names(bigramFreqsTopTwenty),
       bigramFreqsTopTwenty,
-      main="Top 20 Bigrams",
+      main="Top 20 English Language Bigrams",
       geom="bar",
       stat="identity",
       xlab="Terms",
@@ -396,7 +396,7 @@ rm(bigramFreqs)
 ```{r plotBottomTwentyBigrams, echo=FALSE, results='hide', fig.height=4.5, fig.width=7, fig.align='center'}
 qplot(names(bigramFreqsBottomTwenty),
       bigramFreqsBottomTwenty,
-      main="Bottom 20 Bigrams",
+      main="Bottom 20 English Language Bigrams",
       geom="bar",
       stat="identity",
       xlab="Terms",
@@ -418,11 +418,11 @@ tdmTri <-
 
 trigramFreqs <- sort(rowSums(tdmTri), decreasing=TRUE)
 trigramFreqs <- 100*trigramFreqs / sum(trigramFreqs)
-trigramFreqs <- head(trigramFreqs, 20)
+trigramFreqsTopTwenty <- head(trigramFreqs, 20)
 
-qplot(names(trigramFreqs),
-      trigramFreqs,
-      main="Top 20 Trigrams",
+qplot(names(trigramFreqsTopTwenty),
+      trigramFreqsTopTwenty,
+      main="Top 20 English Language Trigrams",
       geom="bar",
       stat="identity",
       xlab="Terms",
