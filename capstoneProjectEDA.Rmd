@@ -285,7 +285,8 @@ percentageToSample <- 1
     - [Rweka R package syntax for computing a bigram TDM](http://stackoverflow.com/questions/17703553/bigrams-instead-of-single-words-in-termdocument-matrix-using-r-and-rweka)  
     - [Rweka R package syntax for computing a trigram TDM](http://stackoverflow.com/questions/19615181/finding-ngrams-in-r-and-comparing-ngrams-across-corpora)  
 - Word feature analysis R scripts
-    - [Sample text file]
+    - [Sample text file](https://github.com/datasciencespm/DataScienceCapstone/blob/master/sampleTextFile.R)
+    - [Form Line Corpus](https://github.com/datasciencespm/DataScienceCapstone/blob/master/formLineCorpus.R)  
 
 ## Unique Word Cumulative Distribution Function  
 - This plot illustrates the number of words required to model 50% and 90% of words
