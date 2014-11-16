@@ -305,7 +305,7 @@ if (!file.exists(lineCorpusFile)) {
     sampledTextFileSizePath <- 
         determineSampledTextFileSize(outputTextFileDirectory,
                                      percentageToSample)
-    load(outputFilePath)
+    load(sampledTextFileSizePath)
 
     lineCorpus <- list()    
     for (curTextFile in dir(outputTextFileDirectory,
@@ -386,7 +386,8 @@ qplot(names(termFreqsTopTwenty),
       geom="bar",
       stat="identity",
       xlab="Terms",
-      ylab="P(term) [%]") + coord_flip() + theme_gray(base_size=16)
+      ylab="P(term) [%]") + coord_flip() + theme_gray(base_size=14) +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 rm(tdm)
 rm(termFreqs)
@@ -406,7 +407,7 @@ tdmBi <-
                                  control = list(tokenize = BigramTokenizer)))
 ```
 
-```{r plotTopTwentyBigrams, echo=FALSE, results='hide', fig.height=4.5, fig.width=7, fig.align='center'}
+```{r plotTopTwentyBigrams, echo=FALSE, results='hide', fig.height=4, fig.width=8, fig.align='center'}
 bigramFreqs <- sort(rowSums(tdmBi), decreasing=TRUE)
 bigramFreqs <- 100*bigramFreqs / sum(bigramFreqs)
 bigramFreqsTopTwenty <- head(bigramFreqs, 20)
@@ -418,7 +419,8 @@ qplot(names(bigramFreqsTopTwenty),
       geom="bar",
       stat="identity",
       xlab="Terms",
-      ylab="P(Bigram)") + coord_flip() + theme_gray(base_size=16)
+      ylab="P(Bigram)") + coord_flip() + theme_gray(base_size=14) +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 rm(tdmBi)
 rm(bigramFreqs)
@@ -427,14 +429,17 @@ rm(bigramFreqs)
 ## Bigram Distribution
 - This bar chart illustrates the bottom twenty word pairs (i.e. 'bigrams') in a 
 `r percentageToSample`% sample of the english language text files  
-```{r plotBottomTwentyBigrams, echo=FALSE, results='hide', fig.height=4.5, fig.width=7, fig.align='center'}
+    - Unexpected result suggests that bigrams that include the word `zombie` 
+    occur with a relatively low frequency  
+```{r plotBottomTwentyBigrams, echo=FALSE, results='hide', fig.height=4, fig.width=8, fig.align='center'}
 qplot(names(bigramFreqsBottomTwenty),
       bigramFreqsBottomTwenty,
       main="Bottom 20 English Language Bigrams",
       geom="bar",
       stat="identity",
       xlab="Terms",
-      ylab="P(Bigram)") + coord_flip() + theme_gray(base_size=16)
+      ylab="P(Bigram)") + coord_flip() + theme_gray(base_size=14) +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
   
 ## Trigram Distribution  
@@ -451,7 +456,7 @@ tdmTri <-
                                  control = list(tokenize = TrigramTokenizer)))
 ```
 
-```{r plotTopTwentyTrigrams, echo=FALSE, results='hide', fig.height=4.5, fig.width=7, fig.align='center'}
+```{r plotTopTwentyTrigrams, echo=FALSE, results='hide', fig.height=4, fig.width=8, fig.align='center'}
 trigramFreqs <- sort(rowSums(tdmTri), decreasing=TRUE)
 trigramFreqs <- 100*trigramFreqs / sum(trigramFreqs)
 trigramFreqsTopTwenty <- head(trigramFreqs, 20)
@@ -464,21 +469,25 @@ qplot(names(trigramFreqsTopTwenty),
       geom="bar",
       stat="identity",
       xlab="Terms",
-      ylab="P(Trigram)") + coord_flip() + theme_gray(base_size=16)
+      ylab="P(Trigram)") + coord_flip() + theme_gray(base_size=14) +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 ## Trigram Distribution  
 - This bar chart illustrates the bottom twenty word triplets (i.e. 'trigrams') in a 
 `r percentageToSample`% sample of the english language text files  
+    - Unexpected result suggests that trigrams that include the word `zombie` 
+    occur with a relatively low frequency
 
-```{r plotBottomsTwentyTrigrams, echo=FALSE, results='hide', fig.height=4.5, fig.width=7, fig.align='center'}
+```{r plotBottomsTwentyTrigrams, echo=FALSE, results='hide', fig.height=4, fig.width=8, fig.align='center'}
 qplot(names(trigramFreqsBottomTwenty),
       trigramFreqsBottomTwenty,
       main="Bottom 20 English Language Trigrams",
       geom="bar",
       stat="identity",
       xlab="Terms",
-      ylab="P(Trigram)") + coord_flip() + theme_gray(base_size=16)
+      ylab="P(Trigram)") + coord_flip() + theme_gray(base_size=14) +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
  
 ## Word Feature Analysis Technical References 
