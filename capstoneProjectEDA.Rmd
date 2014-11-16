@@ -441,7 +441,7 @@ qplot(names(bigramFreqsBottomTwenty),
 - This bar chart illustrates the top twenty word triplets (i.e. 'trigrams') in a 
 `r percentageToSample`% sample of the english language text files  
 
-```{r plotTopTwentyTrigrams, echo=FALSE, results='hide', fig.height=4.5, fig.width=7, fig.align='center'}
+```{r computeTrigramTDM, echo=FALSE, results='hide'}
 TrigramTokenizer <- function(x) {
     RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 3, max = 3))
 }
@@ -449,7 +449,9 @@ TrigramTokenizer <- function(x) {
 tdmTri <- 
     as.matrix(TermDocumentMatrix(combinedCorpus,
                                  control = list(tokenize = TrigramTokenizer)))
+```
 
+```{r plotTopTwentyTrigrams, echo=FALSE, results='hide', fig.height=4.5, fig.width=7, fig.align='center'}
 trigramFreqs <- sort(rowSums(tdmTri), decreasing=TRUE)
 trigramFreqs <- 100*trigramFreqs / sum(trigramFreqs)
 trigramFreqsTopTwenty <- head(trigramFreqs, 20)
