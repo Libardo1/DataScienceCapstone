@@ -20,6 +20,7 @@ library(ggplot2)
 library(R.utils)
 library(NLP)
 library(stringr)
+library(textcat)
 ```
 
 ```{r defineTextFileRandomSampler, echo=FALSE}
@@ -90,18 +91,53 @@ textFile <- "en_US.twitter1p00Percent.txt"
 
 source("./formLineCorpus.R")
 
-lineCorpus <- list()
-lineCorpus[[textFile]] <- formLineCorpus(textFilePath,
-                                         textFile,
-                                         "english",
-                                         blackList,
-                                         TRUE)
+```
 
-#http://stackoverflow.com/questions/15506118/make-dataframe-of-top-n-frequent-terms-for-multiple-corpora-using-tm-package-in
+```{r plotCDF}
+# http://rpsychologist.com/creating-a-typical-textbook-illustration-of-statistical-power-using-either-ggplot-or-base-graphics
 tdm <- as.matrix(TermDocumentMatrix(lineCorpus[[textFile]]))
 termFreqs <- sort(rowSums(tdm), decreasing=TRUE)
+termPDF <- termFreqs / sum(termFreqs)
+termCDF <- cumsum(termPDF)
+
+fiftyPercentIdx <- which(termCDF >= 0.50)[1]
+sixtyFivePercentIdx <- which(termCDF >= 0.65)[1]
+eightySevenPercentIdx <- which(termCDF >= 0.87)[1]
+ninetyPercentIdx <- which(termCDF >= 0.90)[1]
+
+plot(termCDF,
+     xlab="# of unique words",
+     ylab="Unique Words Cumulative Distribution Function",
+     panel.first = grid(), pch=19, col="darkblue")
+
+lines(fiftyPercentIdx*rep(1,6),seq(from=0,to=0.5,by=0.1),
+      col="firebrick",lty=2,lwd=2)
+lines(seq(from=1,to=fiftyPercentIdx,by=1),0.5*rep(1,fiftyPercentIdx),
+      col="firebrick",lty=2,lwd=2)
+arrows(sixtyFivePercentIdx,0.42,fiftyPercentIdx,0.5,
+       lwd=2,length=0.15,col="firebrick")
+text(sixtyPercentIdx,0.4,sprintf("# of words: %d", fiftyPercentIdx),pos=4,
+     col="firebrick")
+
+lines(ninetyPercentIdx*rep(1,10),seq(from=0,to=0.9,by=0.1),
+      col="springgreen4",lty=2,lwd=2)
+lines(seq(from=1,to=ninetyPercentIdx,by=1),0.9*rep(1,ninetyPercentIdx),
+      col="springgreen4",lty=2,lwd=2)
+arrows(eightySevenPercentIdx,0.72,ninetyPercentIdx,0.9,
+       lwd=2,length=0.15,col="springgreen4")
+text(eightySevenPercentIdx,0.72,sprintf("# of words: %d", ninetyPercentIdx),
+     pos=1,col="springgreen4")
+```
+
+
+```{r plotHistogram}
+#http://stackoverflow.com/questions/15506118/make-dataframe-of-top-n-frequent-terms-for-multiple-corpora-using-tm-package-in
+
+
 termFreqs <- 100*(termFreqs / sum(termFreqs))
 termFreqs <- head(termFreqs, 20)
+
+cumualtiveSum <- cumsum(termFreqs)
 
 # http://www.r-bloggers.com/using-r-barplot-with-ggplot2/
 qplot(names(termFreqs),

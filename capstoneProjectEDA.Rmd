@@ -35,8 +35,14 @@ if (!file.exists("./Data/final")) {
                   destfile="./Data/Terms-to-Block.csv")
 }
 
+blackList <- read.csv("./Data/Terms-to-Block.csv",header=FALSE,skip=4)
+blackList <- blackList[,2]
+blackList <- gsub(",","",blackList)
+
 source("./determineTextFileSize.R")
 source("./determineWordCount.R")
+source("./formLineCorpus.R")
+source("./sampleTextFile.R")
 ```
 
 ## Introduction
@@ -171,7 +177,7 @@ rm(num_lines)
     - [R script source code](https://github.com/datasciencespm/DataScienceCapstone/blob/master/determineWordCount.R)
 
 ## Count the number of words {.columns-2}
-```{r, echo=FALSE, results='hide'}
+```{r countNumberOfWords, echo=FALSE, results='hide'}
 #http://stackoverflow.com/questions/22871611/how-can-i-fix-column-breaks-in-an-rmarkdown-ioslides-presentation
 if (!file.exists(baseOutputDataPath)) {
     dir.create(baseOutputDataPath)
@@ -232,4 +238,51 @@ print(xtable(t(num_words)),
       type="html",
       html.table.attributes="class='table-bordered'")
 rm(num_words)
+```
+
+## Word Features   
+```{r randomlySampleEnglishTextDocuments, echo=FALSE, results='hide'}
+set.seed(1089165195)
+outputTextFileDirectory <- "./OutputData//en_US/"
+percentageToSample <- 1
+
+samplingStr <- initializeSamplingString(percentageToSample)
+
+sampledTextFileRegex <- initializeSampledTextFileRegex(percentageToSample)
+
+if (length(dir(outputTextFileDirectory,
+               pattern=sampledTextFileRegex)) == 0){
+    applyRandomSamplerToTextFiles("./Data/final//en_US/",
+                                  percentageToSample,
+                                  outputTextFileDirectory,
+                                  TRUE) 
+}
+
+languageId <- basename(outputTextFileDirectory)
+
+lineCorpusFile <- file.path(outputTextFileDirectory,
+                            pattern=paste0(languageId,
+                                           samplingStr,
+                                           "LineCorpus.RData"))
+
+if (!file.exists(lineCorpusFile)) {
+    sampledTextFileSizePath <- 
+        determineSampledTextFileSize(outputTextFileDirectory,
+                                     percentageToSample)
+    load(outputFilePath)
+
+    lineCorpus <- list()    
+    for (curTextFile in dir(outputTextFileDirectory,
+                            pattern=sampledTextFileRegex)) {
+        lineCorpus[[curTextFile]] <- 
+            formLineCorpus(outputTextFileDirectory,
+                           curTextFile,
+                           "english",
+                           sampledDocNumLines,
+                           blackList,
+                           TRUE)
+    }
+    save(file=lineCorpusFile, lineCorpus)    
+}
+load(lineCorpusFile)
 ```

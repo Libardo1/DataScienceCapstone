@@ -8,6 +8,7 @@ convertToLowerCase <- content_transformer(function(x) tolower(x))
 formLineCorpus <- function(textFilePath,
                            textFile,
                            textFileLanguage,
+                           num_lines,
                            blackList,
                            displayStatus=FALSE) {
     #--------------------------------------------------------------------------
@@ -21,6 +22,9 @@ formLineCorpus <- function(textFilePath,
     #
     #   textFileLanguage: String that describes the text file language 
     #                      (i.e "english")
+    #
+    #   num_lines: List that stores the number of lines in a set of text 
+    #              documents
     #
     #   blackList: Character vector that stores a list of words to exclude from
     #              from a line corpus
@@ -60,7 +64,7 @@ formLineCorpus <- function(textFilePath,
                               num_lines_read, num_lines[[textFile]]))
             }
             
-            curChunkLanguage <- textcat(cur_chunk, p = my.profiles)
+            curChunkLanguage <- textcat(cur_chunk, p = profileDb)
 
             validLanguageIdx <- 
                 which(grepl(paste0(textFileLanguage,"[a-z0-9_]*"),

@@ -35,10 +35,15 @@ sampleTextFile <- function(inputTextFilePath,
     
     # http://stackoverflow.com/questions/15532810/reading-40-gb-csv-file-into-r-using-bigmemory?lq=1
     # http://stackoverflow.com/questions/7260657/how-to-read-whitespace-delimited-strings-until-eof-in-r
-    if (lines_to_read > num_lines[[basename(inputTextFilePath)]][1]) {
-        lines_to_read <- num_lines[[basename(inputTextFilePath)]][1]
-    }
+    maxLinesToRead <- ceiling(num_lines[[basename(inputTextFilePath)]][1]/10)
+    minLinesToRead <- ceiling(num_lines[[basename(inputTextFilePath)]][1]/100)
     
+    if (lines_to_read > maxLinesToRead) {
+        lines_to_read <- maxLinesToRead
+    }else if (lines_to_read < minLinesToRead) {
+        lines_to_read <- minLinesToRead
+    }
+
     sample_line_idx <- numeric()
     file_subset <- character()
     
@@ -171,6 +176,23 @@ sampleTextFileUnitTest <- function(textFilePath,
     }
 }
 
+initializeSamplingString <- function(percentageToSample) {
+    #--------------------------------------------------------------------
+    # Initializes a string that identifies the percentage of a text file
+    # that was randomly sampled
+    #
+    # Args:
+    #   percentageToSample: Percentage of text file to randomly sample
+    #
+    # Returns:
+    #   samplingStr: String that identifies the percentage of a text file
+    #                that was randomly sampled
+    #--------------------------------------------------------------------
+    samplingStr = gsub("\\.","p",sprintf("%.2fPercent", percentageToSample))
+    
+    return(samplingStr)
+}
+
 applyRandomSamplerToTextFiles <- function(inputTextFileDirectory,
                                           percentageToSample,
                                           outputTextFileDirectory,
@@ -201,12 +223,14 @@ applyRandomSamplerToTextFiles <- function(inputTextFileDirectory,
     
     textFileSampling <- list()
 
-    samplingStr = gsub("\\.","p",sprintf("%.2fPercent", percentageToSample))
+    samplingStr = initializeSamplingString(percentageToSample)
 
-    for(curTextFile in dir(inputTextFileDirectory, pattern="(.)*.txt")) {        
-        print(sprintf("Generating a %.2f%% random sample of %s",
-                      percentageToSample, curTextFile))
-        
+    for(curTextFile in dir(inputTextFileDirectory, pattern="(.)*.txt")) {
+        if (displayStatus) {
+            print(sprintf("Generating a %.2f%% random sample of %s",
+                          percentageToSample, curTextFile))            
+        }
+
         curOutputFileName <- 
             paste0(strsplit(curTextFile,"\\.txt"),samplingStr,".txt")
     
