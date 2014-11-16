@@ -103,19 +103,7 @@ source("./formLineCorpus.R")
 #http://stackoverflow.com/questions/15506118/make-dataframe-of-top-n-frequent-terms-for-multiple-corpora-using-tm-package-in
 
 
-termFreqs <- 100*(termFreqs / sum(termFreqs))
-termFreqs <- head(termFreqs, 20)
 
-cumualtiveSum <- cumsum(termFreqs)
-
-# http://www.r-bloggers.com/using-r-barplot-with-ggplot2/
-qplot(names(termFreqs),
-      termFreqs,
-      main="Top 20 Terms",
-      geom="bar",
-      stat="identity",
-      xlab="Terms",
-      ylab="P(term) [%]") + coord_flip() + theme_gray(base_size=16)
 
 #http://beyondvalence.blogspot.com/2014/01/text-mining-4-performing-term.html
 ```

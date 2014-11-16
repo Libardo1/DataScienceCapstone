@@ -13,14 +13,15 @@ output:
 # http://stackoverflow.com/questions/13090838/r-markdown-avoiding-package-loading-messages
 Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre1.8.0_20')
 
+library(ggplot2)
 library(Gmisc)
 library(rJava)
 library(RWeka)
 library(R.utils)
-library(tm)
-library(stringr)
 library(stringi)
+library(stringr)
 library(textcat)
+library(tm)
 library(xtable)
 
 if (!file.exists("./Data/final")) {
@@ -240,7 +241,7 @@ print(xtable(t(num_words)),
 rm(num_words)
 ```
 
-## Word Features  
+## Unique Word Cumulative Distribution Function    
 ```{r initializeLineCorpusConstruction, echo=FALSE, results='hide'}
 set.seed(1089165195)
 outputTextFileDirectory <- "./OutputData//en_US/"
@@ -334,4 +335,24 @@ arrows(eightyFivePercentIdx,0.72,ninetyPercentIdx,0.9,
        lwd=2,length=0.15,col="springgreen4")
 text(eightyFivePercentIdx,0.72,sprintf("# of words: %d", ninetyPercentIdx),
      pos=1,col="springgreen4")
+```
+
+## Unigram Distribution  
+- Figure illustrates top twenty words (i.e. 'unigrams') in a 
+`r percentageToSample`% sample of the english language text files  
+
+```{r plotTopTwentyWord, echo=FALSE, results='hide', fig.height=4.5, fig.width=7, fig.align='center'}
+termFreqs <- 100*(termFreqs / sum(termFreqs))
+termFreqsTopTwenty <- head(termFreqs, 20)
+
+cumualtiveSum <- cumsum(termFreqsTopTwenty)
+
+# http://www.r-bloggers.com/using-r-barplot-with-ggplot2/
+qplot(names(termFreqsTopTwenty),
+      termFreqsTopTwenty,
+      main="Top 20 English Language Words",
+      geom="bar",
+      stat="identity",
+      xlab="Terms",
+      ylab="P(term) [%]") + coord_flip() + theme_gray(base_size=16)
 ```
