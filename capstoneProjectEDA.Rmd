@@ -292,7 +292,7 @@ percentageToSample <- 1
 - This plot illustrates the number of words required to model 50% and 90% of words
 in a `r percentageToSample`% sample of the english language text files
 
-```{r constructLineCorpus, echo=FALSE, results='hide', fig.height=4.5, fig.width=7, fig.align='center'}
+```{r constructLineCorpus, echo=FALSE, results='hide', cache=TRUE}
 samplingStr <- initializeSamplingString(percentageToSample)
 
 sampledTextFileRegex <- initializeSampledTextFileRegex(percentageToSample)
@@ -348,7 +348,9 @@ tdm <- as.matrix(TermDocumentMatrix(combinedCorpus))
 termFreqs <- sort(rowSums(tdm), decreasing=TRUE)
 termPDF <- termFreqs / sum(termFreqs)
 termCDF <- cumsum(termPDF)
+```
 
+```{r plotUniqueWordsCDF,echo=FALSE, results='hide', fig.height=4.5, fig.width=7, fig.align='center'}
 fiftyPercentIdx <- which(termCDF >= 0.50)[1]
 sixtyFivePercentIdx <- which(termCDF >= 0.65)[1]
 eightyFivePercentIdx <- which(termCDF >= 0.85)[1]
@@ -461,6 +463,7 @@ trigramFreqs <- sort(rowSums(tdmTri), decreasing=TRUE)
 trigramFreqs <- 100*trigramFreqs / sum(trigramFreqs)
 trigramFreqsTopTwenty <- head(trigramFreqs, 20)
 trigramFreqsBottomTwenty <- tail(trigramFreqs, 20)
+rm(trigramFreqs)
 
 qplot(names(trigramFreqsTopTwenty),
       trigramFreqsTopTwenty,
