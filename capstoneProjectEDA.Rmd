@@ -1,7 +1,7 @@
 ---
 title: "JHU Data Science Specialization Capstone Project Exploratory Data Analysis"
 author: "mspcvsp"
-date: "Monday, November 10, 2014"
+date: "November 16, 2014"
 output:
   ioslides_presentation:
     widescreen: true
@@ -50,7 +50,7 @@ source("./sampleTextFile.R")
 
 - The objective of the Data Science Capstone project is to develop an application that
 predicts the next word a user will type into a mobile device
-    - [Capstone Project Introduction](http://simplystatistics.org/2014/08/19/swiftkey-and-johns-hopkins-partner-for-data-science-specialization-capstone/)  
+    - [Capstone project introduction](http://simplystatistics.org/2014/08/19/swiftkey-and-johns-hopkins-partner-for-data-science-specialization-capstone/)  
 -  The purpose of this presentation is to discuss the following topics:
     - Summarize the statistics of the Capstone project text data sets
     - Describe unusual characteristics of this data  
@@ -69,7 +69,6 @@ predicts the next word a user will type into a mobile device
 - This presentation will discuss the following summary statistics
     - Number of lines in each text file
     - Number of words in each text file
-    - Word feature analysis
 
 - There are three language models evaluated in this report
     - Unigram
@@ -386,8 +385,8 @@ qplot(names(termFreqsTopTwenty),
       main="Top 20 English Language Words",
       geom="bar",
       stat="identity",
-      xlab="Terms",
-      ylab="P(term) [%]") + coord_flip() + theme_gray(base_size=14) +
+      xlab="Word",
+      ylab="P(Word) [%]") + coord_flip() + theme_gray(base_size=14) +
       theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 rm(tdm)
@@ -419,7 +418,7 @@ qplot(names(bigramFreqsTopTwenty),
       main="Top 20 English Language Bigrams",
       geom="bar",
       stat="identity",
-      xlab="Terms",
+      xlab="Bigram",
       ylab="P(Bigram)") + coord_flip() + theme_gray(base_size=14) +
       theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
@@ -438,7 +437,7 @@ qplot(names(bigramFreqsBottomTwenty),
       main="Bottom 20 English Language Bigrams",
       geom="bar",
       stat="identity",
-      xlab="Terms",
+      xlab="Bigram",
       ylab="P(Bigram)") + coord_flip() + theme_gray(base_size=14) +
       theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
@@ -469,7 +468,7 @@ qplot(names(trigramFreqsTopTwenty),
       main="Top 20 English Language Trigrams",
       geom="bar",
       stat="identity",
-      xlab="Terms",
+      xlab="Trigram",
       ylab="P(Trigram)") + coord_flip() + theme_gray(base_size=14) +
       theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
@@ -486,7 +485,7 @@ qplot(names(trigramFreqsBottomTwenty),
       main="Bottom 20 English Language Trigrams",
       geom="bar",
       stat="identity",
-      xlab="Terms",
+      xlab="Trigram",
       ylab="P(Trigram)") + coord_flip() + theme_gray(base_size=14) +
       theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
@@ -498,7 +497,7 @@ qplot(names(trigramFreqsBottomTwenty),
     - [Bickel, S., P. Haider, and T. Scheffer. "Predicting Sentences using N-Gram Language Models"](http://www.cs.uni-potsdam.de/ml/publications/emnlp2005.pdf)
 - Evaluate Markov chains language model implementation
     - [Antonov, A. "Markov chains n-gram model implementation"](http://mathematicaforprediction.wordpress.com/2014/01/25/markov-chains-n-gram-model-implementation/)  
-- Focus minimizing the prediction application memory requirement
+- Focus on minimizing the prediction application memory requirement
     - [Cohen P. & C. A. Sutton. "Very Predictive Ngrams for Space-Limited Probabilistic Models"](http://homepages.inf.ed.ac.uk/csutton/publications/vpr.pdf)  
 
 ## Summary  
