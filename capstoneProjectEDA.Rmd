@@ -248,7 +248,7 @@ outputTextFileDirectory <- "./OutputData//en_US/"
 percentageToSample <- 1
 ```
 
-- Plot illustrates the number of words required to model 50% and 90% of words
+- This plot illustrates the number of words required to model 50% and 90% of words
 in a `r percentageToSample`% sample of the english language text files
 
 ```{r constructLineCorpus, echo=FALSE, results='hide', fig.height=4.5, fig.width=7, fig.align='center'}
@@ -338,7 +338,7 @@ text(eightyFivePercentIdx,0.72,sprintf("# of words: %d", ninetyPercentIdx),
 ```
 
 ## Unigram Distribution  
-- Figure illustrates top twenty words (i.e. 'unigrams') in a 
+- This bar chart illustrates the top twenty words (i.e. 'unigrams') in a 
 `r percentageToSample`% sample of the english language text files  
 
 ```{r plotTopTwentyWord, echo=FALSE, results='hide', fig.height=4.5, fig.width=7, fig.align='center'}
