@@ -419,10 +419,25 @@ tdmTri <-
 trigramFreqs <- sort(rowSums(tdmTri), decreasing=TRUE)
 trigramFreqs <- 100*trigramFreqs / sum(trigramFreqs)
 trigramFreqsTopTwenty <- head(trigramFreqs, 20)
+trigramFreqsBottomTwenty <- tail(trigramFreqs, 20)
 
 qplot(names(trigramFreqsTopTwenty),
       trigramFreqsTopTwenty,
       main="Top 20 English Language Trigrams",
+      geom="bar",
+      stat="identity",
+      xlab="Terms",
+      ylab="P(Trigram)") + coord_flip() + theme_gray(base_size=16)
+```
+
+## Trigram Distribution  
+- This bar chart illustrates the bottom twenty word triplets (i.e. 'trigrams') in a 
+`r percentageToSample`% sample of the english language text files  
+
+```{r plotBottomsTwentyTrigrams, echo=FALSE, results='hide', fig.height=4.5, fig.width=7, fig.align='center'}
+qplot(names(trigramFreqsBottomTwenty),
+      trigramFreqsBottomTwenty,
+      main="Bottom 20 English Language Trigrams",
       geom="bar",
       stat="identity",
       xlab="Terms",
