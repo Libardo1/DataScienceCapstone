@@ -267,7 +267,7 @@ percentageToSample <- 1
          - Remove [whitespace](http://www.w3.org/TR/html401/struct/text.html)
          - Convert text to lower case
          - Remove profane words contained in a ["black list"](http://www.frontgatemedia.com/a-list-of-723-bad-words-to-blacklist-and-how-to-use-facebooks-moderation-tool/)
-- Word feature analysis
+- Word feature analysis  
     - Analyze a `r percentageToSample`% sample of the english language text files  
     - Unique word Cumulative Distribution Function (CDF)
     - Top 20 (i.e. highest frequency of occurence) words 
@@ -275,10 +275,19 @@ percentageToSample <- 1
     - Bottom 20 (i.e. least likely) bigrams
     - Top 20 word triplets (i.e. trigrams)
     - Bottom 20 trigrams  
-  
+
+## Word Feature Characterization  
+- Word feature analysis (cont.)  
+    - [Text arrow graph annotation](http://rpsychologist.com/creating-a-typical-textbook-illustration-of-statistical-power-using-either-ggplot-or-base-graphics)  
+    - [Construct data frame that contains the most frequency words in a Corpus](http://stackoverflow.com/questions/15506118/make-dataframe-of-top-n-frequent-terms-for-multiple-corpora-using-tm-package-in)  
+    - [Term Frequency visualization](http://beyondvalence.blogspot.com/2014/01/text-mining-4-performing-term.html)  
+       - [Term Document Matrix](http://beyondvalence.blogspot.com/2014/01/text-mining-3-stemming-text-and.html)  
+    - [Rweka R package syntax for computing bigram Term Document Matrix](http://stackoverflow.com/questions/17703553/bigrams-instead-of-single-words-in-termdocument-matrix-using-r-and-rweka)  
+    - [Rweka R package syntax for computing trigram Term Document Matrix](http://stackoverflow.com/questions/19615181/finding-ngrams-in-r-and-comparing-ngrams-across-corpora)  
+- Word feature analysis R scripts
+    - [Sample text file]
+
 ## Unique Word Cumulative Distribution Function  
-
-
 - This plot illustrates the number of words required to model 50% and 90% of words
 in a `r percentageToSample`% sample of the english language text files
 

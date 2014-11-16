@@ -93,43 +93,6 @@ source("./formLineCorpus.R")
 
 ```
 
-```{r plotCDF}
-# http://rpsychologist.com/creating-a-typical-textbook-illustration-of-statistical-power-using-either-ggplot-or-base-graphics
-
-```
-
-
-```{r plotHistogram}
-#http://stackoverflow.com/questions/15506118/make-dataframe-of-top-n-frequent-terms-for-multiple-corpora-using-tm-package-in
-
-
-
-
-#http://beyondvalence.blogspot.com/2014/01/text-mining-4-performing-term.html
-```
-
-```{r bigram}
-# http://stackoverflow.com/questions/17703553/bigrams-instead-of-single-words-in-termdocument-matrix-using-r-and-rweka
-
-```
-
-```{r trigram}
-#http://stackoverflow.com/questions/19615181/finding-ngrams-in-r-and-comparing-ngrams-across-corpora
-
-
-termFreqs <- sort(rowSums(tdmTri), decreasing=TRUE)
-termFreqs <- termFreqs / sum(termFreqs)
-termFreqs <- head(termFreqs, 20)
-
-qplot(names(termFreqs),
-      termFreqs,
-      main="Top 20 Trigrams",
-      geom="bar",
-      stat="identity",
-      xlab="Terms",
-      ylab="P(Trigram)") + coord_flip() + theme_gray(base_size=16)
-```
-
 ```{r }
 #http://stackoverflow.com/questions/12602652/how-to-count-the-number-of-sentences-in-a-text-in-r
 numberOfLinesToRead <- 1000
