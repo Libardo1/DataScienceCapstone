@@ -54,12 +54,13 @@ predicts the next word a user will type into a mobile device
 -  The purpose of this presentation is to discuss the following topics:
     - Summarize the statistics of the Capstone project text data sets
     - Describe unusual characteristics of this data  
+    - Describe my plan for developing a prediction algorithm & [Shiny](http://shiny.rstudio.com/) application  
 - [An ISO 639-1 Language Code](http://www.w3schools.com/tags/ref_language_codes.asp)
     - Two-character string that refers to a language
     - Data Science Capstone project text data spans the following languages:  
         - English (EN)  
         - Finnish (FI)  
-        - Germain (DE)  
+        - German (DE)  
         - Russian (RU)  
 - The source code for this presentation has been uploaded to Github
     - [Data Science Capstone project Github repository](https://github.com/datasciencespm/DataScienceCapstone/tree/master)  
@@ -270,7 +271,7 @@ percentageToSample <- 1
 - Word feature analysis approach  
     - Analyze a `r percentageToSample`% sample of the english language text files  
     - Unique word Cumulative Distribution Function (CDF)
-    - Top 20 (i.e. highest frequency of occurence) words 
+    - Top 20 (i.e. highest frequency of occurrence) words 
     - Top 20 word pairs (i.e. bigrams)
     - Bottom 20 (i.e. least likely) bigrams
     - Top 20 word triplets (i.e. trigrams)
@@ -429,8 +430,8 @@ rm(bigramFreqs)
 ## Bigram Distribution
 - This bar chart illustrates the bottom twenty word pairs (i.e. 'bigrams') in a 
 `r percentageToSample`% sample of the english language text files  
-    - Unexpected result suggests that bigrams that include the word `zombie` 
-    occur with a relatively low frequency  
+    - Unexpected result suggests bigrams that include the word `zombie` occur 
+    with a relatively low frequency  
 ```{r plotBottomTwentyBigrams, echo=FALSE, results='hide', fig.height=4, fig.width=8, fig.align='center'}
 qplot(names(bigramFreqsBottomTwenty),
       bigramFreqsBottomTwenty,
@@ -476,8 +477,8 @@ qplot(names(trigramFreqsTopTwenty),
 ## Trigram Distribution  
 - This bar chart illustrates the bottom twenty word triplets (i.e. 'trigrams') in a 
 `r percentageToSample`% sample of the english language text files  
-    - Unexpected result suggests that trigrams that include the word `zombie` 
-    occur with a relatively low frequency
+    - Unexpected result suggests trigrams that include the word `zombie` occur
+    with a relatively low frequency
 
 ```{r plotBottomsTwentyTrigrams, echo=FALSE, results='hide', fig.height=4, fig.width=8, fig.align='center'}
 qplot(names(trigramFreqsBottomTwenty),
@@ -489,9 +490,35 @@ qplot(names(trigramFreqsBottomTwenty),
       ylab="P(Trigram)") + coord_flip() + theme_gray(base_size=14) +
       theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
- 
+
+## Prediction Algorithm & Shiny Application Development Plan  
+- Start with building a simple n-gram prediction model
+    - [Carmignani, N. "Predicting Words and Sentences using Statistical Models"](http://medialab.di.unipi.it/web/Language+Intelligence/Prediction.pdf)  
+    - [Hillard, D. S. Petersen & M. Ostendorf. "N-gram Language Modeling Tutorial"](http://ssli.ee.washington.edu/WS07/notes/ngrams.pdf)  
+    - [Bickel, S., P. Haider, and T. Scheffer. "Predicting Sentences using N-Gram Language Models"](http://www.cs.uni-potsdam.de/ml/publications/emnlp2005.pdf)
+- Evaluate Markov chains language model implementation
+    - [Antonov, A. "Markov chains n-gram model implementation"](http://mathematicaforprediction.wordpress.com/2014/01/25/markov-chains-n-gram-model-implementation/)  
+- Focus minimizing the prediction application memory requirement
+    - [Cohen P. & C. A. Sutton. "Very Predictive Ngrams for Space-Limited Probabilistic Models"](http://homepages.inf.ed.ac.uk/csutton/publications/vpr.pdf)  
+
+## Summary  
+- This presentation discussed the following summary statistics
+    - Number of lines in each text file
+    - Number of words in each text file  
+
+- Three language models were evaluated in this report
+    - Unigram
+        - Single word features
+    - Bigram
+        - Word pairs
+    - Trigram
+        - Three word segment
+
+- Prediction algorithm & [Shiny](http://shiny.rstudio.com/) application development plan was presented  
+
 ## Word Feature Analysis Technical References 
 - [Text arrow graph annotation](http://rpsychologist.com/creating-a-typical-textbook-illustration-of-statistical-power-using-either-ggplot-or-base-graphics)  
+- [Rotate ggplot2 axis label](http://stackoverflow.com/questions/1330989/rotating-and-spacing-axis-labels-in-ggplot2)
 - [Construct data frame that contains the most frequency words in a corpus](http://stackoverflow.com/questions/15506118/make-dataframe-of-top-n-frequent-terms-for-multiple-corpora-using-tm-package-in)  
 - [Term Frequency visualization](http://beyondvalence.blogspot.com/2014/01/text-mining-4-performing-term.html)  
     - [Term Document Matrix (TDM)](http://beyondvalence.blogspot.com/2014/01/text-mining-3-stemming-text-and.html)  
