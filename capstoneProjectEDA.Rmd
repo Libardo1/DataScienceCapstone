@@ -244,7 +244,7 @@ rm(num_words)
 ## Word Feature Characterization
 - Sample text documents
     - [Read large text file into memory](http://stackoverflow.com/questions/15532810/reading-40-gb-csv-file-into-r-using-bigmemory?lq=1)
-- Form a collection of documents (i.e. `Corpus`) from text file lines
+- Form a collection of documents (i.e. `corpus`) from text file lines
     - Input is a randomly sampled percentage of the original text files
         - No correspondence between lines  
     - Read text data N lines at a time
@@ -253,7 +253,7 @@ rm(num_words)
         - [Remove non-ASCII characters from text data](http://stackoverflow.com/questions/9934856/removing-non-ascii-characters-from-data-files)  
         - [Remove non-ASCII characters from corpus](http://stackoverflow.com/questions/18153504/removing-non-english-text-from-corpus-in-r-using-tm)  
     - Detect and remove non-english language text
-        - [Segment text language using textcat R package](http://stackoverflow.com/questions/24099098/language-detection-in-r-with-the-textcat-package-how-to-restrict-to-a-few-lang)  
+        - [Segment text language using the textcat R package](http://stackoverflow.com/questions/24099098/language-detection-in-r-with-the-textcat-package-how-to-restrict-to-a-few-lang)  
         
 ## Word Feature Characterization  
 ```{r initializeLineCorpusConstruction, echo=FALSE, results='hide'}
@@ -267,7 +267,7 @@ percentageToSample <- 1
          - Remove [whitespace](http://www.w3.org/TR/html401/struct/text.html)
          - Convert text to lower case
          - Remove profane words contained in a ["black list"](http://www.frontgatemedia.com/a-list-of-723-bad-words-to-blacklist-and-how-to-use-facebooks-moderation-tool/)
-- Word feature analysis  
+- Word feature analysis approach  
     - Analyze a `r percentageToSample`% sample of the english language text files  
     - Unique word Cumulative Distribution Function (CDF)
     - Top 20 (i.e. highest frequency of occurence) words 
@@ -276,21 +276,10 @@ percentageToSample <- 1
     - Top 20 word triplets (i.e. trigrams)
     - Bottom 20 trigrams  
 
-## Word Feature Characterization  
-- Word feature analysis (cont.)  
-    - [Text arrow graph annotation](http://rpsychologist.com/creating-a-typical-textbook-illustration-of-statistical-power-using-either-ggplot-or-base-graphics)  
-    - [Construct data frame that contains the most frequency words in a corpus](http://stackoverflow.com/questions/15506118/make-dataframe-of-top-n-frequent-terms-for-multiple-corpora-using-tm-package-in)  
-    - [Term Frequency visualization](http://beyondvalence.blogspot.com/2014/01/text-mining-4-performing-term.html)  
-        - [Term Document Matrix (TDM)](http://beyondvalence.blogspot.com/2014/01/text-mining-3-stemming-text-and.html)  
-    - [Rweka R package syntax for computing a bigram TDM](http://stackoverflow.com/questions/17703553/bigrams-instead-of-single-words-in-termdocument-matrix-using-r-and-rweka)  
-    - [Rweka R package syntax for computing a trigram TDM](http://stackoverflow.com/questions/19615181/finding-ngrams-in-r-and-comparing-ngrams-across-corpora)  
-- Word feature analysis R scripts
-    - [Sample text file](https://github.com/datasciencespm/DataScienceCapstone/blob/master/sampleTextFile.R)
-    - [Form text file line corpus](https://github.com/datasciencespm/DataScienceCapstone/blob/master/formLineCorpus.R)  
-
 ## Unique Word Cumulative Distribution Function  
-- This plot illustrates the number of words required to model 50% and 90% of words
-in a `r percentageToSample`% sample of the english language text files
+- This plot illustrates the number of words required to model 50% and 90% of 
+unique words in a `r percentageToSample`% sample of the english language text 
+files
 
 ```{r constructLineCorpus, echo=FALSE, results='hide', cache=TRUE}
 samplingStr <- initializeSamplingString(percentageToSample)
@@ -407,7 +396,7 @@ rm(termFreqs)
 - This bar chart illustrates the top twenty word pairs (i.e. 'bigrams') in a 
 `r percentageToSample`% sample of the english language text files  
 
-```{r plotTopTwentyBigrams, echo=FALSE, results='hide', fig.height=4.5, fig.width=7, fig.align='center'}
+```{r constructBigramTDM, echo=FALSE, results='hide', cache=TRUE}
 BigramTokenizer <- function(x) {
     RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 2, max = 2))
 }
@@ -415,7 +404,9 @@ BigramTokenizer <- function(x) {
 tdmBi <- 
     as.matrix(TermDocumentMatrix(combinedCorpus,
                                  control = list(tokenize = BigramTokenizer)))
+```
 
+```{r plotTopTwentyBigrams, echo=FALSE, results='hide', fig.height=4.5, fig.width=7, fig.align='center'}
 bigramFreqs <- sort(rowSums(tdmBi), decreasing=TRUE)
 bigramFreqs <- 100*bigramFreqs / sum(bigramFreqs)
 bigramFreqsTopTwenty <- head(bigramFreqs, 20)
@@ -487,4 +478,14 @@ qplot(names(trigramFreqsBottomTwenty),
       xlab="Terms",
       ylab="P(Trigram)") + coord_flip() + theme_gray(base_size=16)
 ```
-  
+ 
+## Word Feature Analysis Technical References 
+- [Text arrow graph annotation](http://rpsychologist.com/creating-a-typical-textbook-illustration-of-statistical-power-using-either-ggplot-or-base-graphics)  
+- [Construct data frame that contains the most frequency words in a corpus](http://stackoverflow.com/questions/15506118/make-dataframe-of-top-n-frequent-terms-for-multiple-corpora-using-tm-package-in)  
+- [Term Frequency visualization](http://beyondvalence.blogspot.com/2014/01/text-mining-4-performing-term.html)  
+    - [Term Document Matrix (TDM)](http://beyondvalence.blogspot.com/2014/01/text-mining-3-stemming-text-and.html)  
+- [Rweka R package syntax for computing a bigram TDM](http://stackoverflow.com/questions/17703553/bigrams-instead-of-single-words-in-termdocument-matrix-using-r-and-rweka)  
+- [Rweka R package syntax for computing a trigram TDM](http://stackoverflow.com/questions/19615181/finding-ngrams-in-r-and-comparing-ngrams-across-corpora)  
+- Word feature analysis R scripts
+    - [Sample text file](https://github.com/datasciencespm/DataScienceCapstone/blob/master/sampleTextFile.R)
+    - [Form text file line corpus](https://github.com/datasciencespm/DataScienceCapstone/blob/master/formLineCorpus.R)  
