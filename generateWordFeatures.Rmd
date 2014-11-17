@@ -65,6 +65,13 @@ for (curTextFile in dir(textFilePath, pattern="*.txt")) {
     
     curWordFeatures <- generateFeatures(featureParams, TRUE)
     
+    curTextFilePrefix <- strsplit(curTextFile,"\\.txt")[[1]]
+    
+    save(file=file.path(outputTextFileDirectory,
+                        paste0(curTextFilePrefix,
+                               samplingStr,
+                               "WordFeatures.RData")), curWordFeatures)
+    
     if (length(names(wordFeatures)) == 0) {
         wordFeatures <- curWordFeatures
     }

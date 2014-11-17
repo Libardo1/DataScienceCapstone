@@ -53,6 +53,9 @@ generateFeatures <- function(featureParams,
     #                 bigramFreqs         Bigram frequency vector
     #
     #                 trigramFreqs        Trigram frequency vector
+    #
+    #                 sample_line_idx     Numeric vector that stores which
+    #                                     text file lines were sampled
     #--------------------------------------------------------------------------
     lines_to_read <- ceiling(10 / (featureParams$percentageToSample / 100))
     
@@ -60,16 +63,10 @@ generateFeatures <- function(featureParams,
     
     # http://stackoverflow.com/questions/15532810/reading-40-gb-csv-file-into-r-using-bigmemory?lq=1
     # http://stackoverflow.com/questions/7260657/how-to-read-whitespace-delimited-strings-until-eof-in-r
-    maxLinesToRead <-
-        ceiling(featureParams$num_lines[[featureParams$textFile]][1]/10)
-    
-    minLinesToRead <-
-        ceiling(featureParams$num_lines[[featureParams$textFile]][1]/25)
-    
-    if (lines_to_read > maxLinesToRead) {
-        lines_to_read <- maxLinesToRead
-    }else if (lines_to_read < minLinesToRead) {
-        lines_to_read <- minLinesToRead
+    if (lines_to_read > 10000) {
+        lines_to_read <- 10000
+    }else if (lines_to_read < 1000) {
+        lines_to_read <- 1000
     }
     
     sample_line_idx <- numeric()
@@ -109,6 +106,8 @@ generateFeatures <- function(featureParams,
     languageRegex <- paste0(featureParams$textFileLanguage,"[a-z0-9_]*")
     total_num_lines <- featureParams$num_lines[[featureParams$textFile]]
     
+    wordFeatures$sample_line_idx <- numeric()
+
     repeat {        
         if (length(cur_chunk) == 0) {
             break
@@ -124,7 +123,10 @@ generateFeatures <- function(featureParams,
                              1,
                              featureParams$percentageToSample/100) == 1)
             
-            
+            wordFeatures$sample_line_idx <-
+                append(wordFeatures$sample_line_idx,
+                       cur_sample_line_idx + num_lines_read)
+
             cur_chunk <- cur_chunk[cur_sample_line_idx]
             
             curChunkLanguage <- textcat(cur_chunk, p = profileDb)
@@ -158,22 +160,29 @@ generateFeatures <- function(featureParams,
                 
                 rm(curChunkCorpus)
                 curTrigramFreqs <- sort(rowSums(tdmTri), decreasing=TRUE)
-                
+                                
                 if (firstChunk) {
                     wordFeatures$wordFreqs <- curWordFreqs
                     wordFeatures$bigramFreqs <- curBigramFreqs
                     wordFeatures$trigramFreqs <- curTrigramFreqs
+                    firstChunk <- FALSE
                 }
                 else {
                     wordFeatures$wordFreqs <- c(wordFeatures$wordFreqs,
                                                 curWordFreqs)
-                    
+
                     wordFeatures$bigramFreqs <- c(wordFeatures$bigramFreqs,
                                                   curBigramFreqs)
                     
                     wordFeatures$trigramFreqs <- c(wordFeatures$trigramFreqs,
                                                    curTrigramFreqs)
                 }
+            
+                if (displayStatus) {
+                    print(sprintf('total # of words: %d',
+                                  sum(wordFeatures$wordFreqs)))
+                }
+
                 rm(curWordFreqs)
                 rm(curBigramFreqs)
                 rm(curTrigramFreqs)
@@ -183,7 +192,7 @@ generateFeatures <- function(featureParams,
         num_lines_read <- num_lines_read + length(cur_chunk)
     }
     close(h_conn)
-    
+
     return(wordFeatures)
 }
 
