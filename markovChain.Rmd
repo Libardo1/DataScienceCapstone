@@ -113,4 +113,52 @@ save(file="./prediction.RData",list=ls())
 ```{r predictor0}
 load("./prediction.RData")
 triTdm0 <- head(triTdm,n=5)
+
+predictorVocabulary <- sort(unique(unlist(str_split(paste(names(triTdm0),
+                                                          collapse=" "),
+                                                    " "))))
+
+predictorVocabularySize <- length(predictorVocabulary)
+
+transitionMatrix = matrix(numeric(predictorVocabularySize^2),
+                                  byrow=TRUE,
+                                  nrow=predictorVocabularySize,
+                                  dimnames=list(predictorVocabulary,
+                                                predictorVocabulary))
+
+for (m in seq_len(length(triTdm0))) {
+    curWords <- unlist(str_split(names(triTdm0[m])," "))
+    
+    for (n in seq(2,3)) {
+        rowIdx <- which(grepl(paste0("^",curWords[n-1],"$"),
+                              predictorVocabulary))
+        colIdx <- which(grepl(paste0("^",curWords[n],"$"),
+                                     predictorVocabulary))
+        transitionMatrix[rowIdx,colIdx] <- triTdm0[m]
+    }
+}
+
+for (m in seq_len(predictorVocabularySize)) {
+    transitionMatrix[m,] = transitionMatrix[m,] / sum(transitionMatrix[m,])
+}
+
+textPredictor <- new("markovchain",
+                     transitionMatrix=transitionMatrix)
+
+for (m in seq_len(length(triTdm0))) {
+    print("-------------------------------------------")
+    print(triTdm0[m])
+    
+    curState <- unlist(str_split(names(triTdm0[m])," "))[1]
+    for (n in seq(1,2)) {
+        curCondProb <- conditionalDistribution(textPredictor,
+                                               curState)
+        maxIdx <- which.max(curCondProb)
+        nextState <- names(curCondProb[maxIdx])
+        print(sprintf("%s -> %s (P: %g)",curState,
+                                         nextState,
+                                         curCondProb[maxIdx]))
+        curState <- nextState
+    }    
+}
 ```
