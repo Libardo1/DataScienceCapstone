@@ -1,0 +1,116 @@
+---
+title: "MarkovChain"
+output: html_document
+---
+
+```{r setupEnvironment}
+library(ggplot2)
+library(Gmisc)
+library(rJava)
+library(RWeka)
+library(R.utils)
+library(stringi)
+library(stringr)
+library(textcat)
+library(tm)
+library(xtable)
+library(markovchain)
+
+source("./determineTextFileSize.R")
+source("./determineWordCount.R")
+source("./formLineCorpus.R")
+source("./sampleTextFile.R")
+```
+
+```{r prototypeMarkovChain, echo=FALSE}
+stateNames <- c("a","b","c")
+markovB <- new("markovchain",
+               transitionMatrix = matrix(c(0.2,0.5,0.3,
+                                           0,1,0,
+                                           0.1,0.8,0.1),
+                                         byrow=TRUE,
+                                         nrow=3,
+                                        dimnames=list(stateNames,stateNames)))
+```
+
+```{r loadData}
+outputTextFileDirectory <- "./OutputData//en_US/"
+
+percentageToSample <- 1
+samplingStr <- initializeSamplingString(percentageToSample)
+
+languageId <- basename(outputTextFileDirectory)
+
+lineCorpusFile <- file.path(outputTextFileDirectory,
+                            pattern=paste0(languageId,
+                                           samplingStr,
+                                           "LineCorpus.RData"))
+
+load(lineCorpusFile)
+
+sampledTextFiles <- names(lineCorpus)
+for (n in seq_len(length(sampledTextFiles))) {
+    if (n == 1){
+        combinedCorpus <- lineCorpus[[sampledTextFiles[n]]]
+    } else {
+        combinedCorpus <- c(combinedCorpus,
+                            lineCorpus[[sampledTextFiles[n]]])
+    }
+}
+rm(lineCorpus)
+
+tdm <- as.matrix(TermDocumentMatrix(combinedCorpus))
+termFreqs <- sort(rowSums(tdm), decreasing=TRUE)
+termPDF <- termFreqs / sum(termFreqs)
+termCDF <- cumsum(termPDF)
+```
+
+```{r }
+TrigramTokenizer <- function(x) {
+    RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 3, max = 3))
+}
+
+for (n in seq(1,length(combinedCorpus))) {
+    if (n %% 10 == 0) {
+        print(sprintf("line #%d", n))    
+    }
+    
+    lineCorpus <- Corpus(VectorSource(as.character(combinedCorpus[[n]])))
+
+    curTdm <- TermDocumentMatrix(lineCorpus,
+                                 control = list(tokenize = TrigramTokenizer))
+    
+    if (n == 1) {
+        triTdm <- curTdm
+    } else {
+        triTdm <- c(triTdm,curTdm)
+    }
+}
+triTdm <- sort(rowSums(as.matrix(triTdm)), decreasing=TRUE)
+save(file="./triTdm",triTdm,termPDF,termCDF)
+
+trigrams <- names(triTdm)
+commonIdx <- numeric()
+
+ninetyPercentIdx <- which(termCDF >= 0.90)[1]
+vocabulary <- names(termCDF[1:ninetyPercentIdx])
+
+for (n in seq_len(length(trigrams))) {
+    if (n %% 100 == 0) {
+        print(sprintf("Trigram #%d (Out of %d)", n, length(trigrams)))    
+    }
+    
+    curWords <- unlist(str_split(trigrams[n]," "))
+    
+    if (sum(curWords %in% vocabulary) >= 2) {
+        commonIdx <- append(commonIdx,n)
+        vocabulary <- append(vocabulary,curWords[!curWords %in% vocabulary])        
+    }
+}
+save(file="./prediction.RData",list=ls())
+```
+
+```{r predictor0}
+load("./prediction.RData")
+triTdm0 <- head(triTdm,n=5)
+```
