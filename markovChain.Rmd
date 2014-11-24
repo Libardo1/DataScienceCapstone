@@ -22,6 +22,49 @@ source("./formLineCorpus.R")
 source("./sampleTextFile.R")
 ```
 
+```{r updateLineCorpus}
+updateLineCorpus <- FALSE
+if (updateLineCorpus)
+    blackList <- read.csv("./Data/Terms-to-Block.csv",header=FALSE,skip=4)
+    blackList <- blackList[,2]
+    blackList <- gsub(",","",blackList)
+    
+    outputTextFileDirectory <- "./OutputData//en_US/"
+    percentageToSample <- 1
+
+    outputFilePath <- 
+        determineSampledTextFileSize(outputTextFileDirectory,
+                                     percentageToSample)
+    load(outputFilePath)
+
+    languageId <- basename(outputTextFileDirectory)
+    
+    samplingStr <- initializeSamplingString(percentageToSample)
+    
+    sampledTextFileRegex <- 
+        initializeSampledTextFileRegex(percentageToSample)
+
+    lineCorpusFile <- file.path(outputTextFileDirectory,
+                                pattern=paste0(languageId,
+                                               samplingStr,
+                                               "LineCorpus.RData"))
+        
+    lineCorpus <- list()    
+    for (curTextFile in dir(outputTextFileDirectory,
+                            pattern=sampledTextFileRegex)) {
+        lineCorpus[[curTextFile]] <- 
+            formLineCorpus(outputTextFileDirectory,
+                           curTextFile,
+                           "english",
+                           sampledDocNumLines,
+                           blackList,
+                           TRUE)
+    }
+    save(file=lineCorpusFile, lineCorpus)    
+}
+load(lineCorpusFile)
+```
+
 ```{r prototypeMarkovChain, echo=FALSE}
 stateNames <- c("a","b","c")
 markovB <- new("markovchain",
@@ -117,6 +160,72 @@ triTdm0 <- head(triTdm,n=50)
 predictorVocabulary <- sort(unique(unlist(str_split(paste(names(triTdm0),
                                                           collapse=" "),
                                                     " "))))
+
+predictorVocabularySize <- length(predictorVocabulary)
+
+transitionMatrix = matrix(numeric(predictorVocabularySize^2),
+                                  byrow=TRUE,
+                                  nrow=predictorVocabularySize,
+                                  dimnames=list(predictorVocabulary,
+                                                predictorVocabulary))
+
+for (m in seq_len(length(triTdm0))) {
+    curWords <- unlist(str_split(names(triTdm0[m])," "))
+    
+    for (n in seq(2,3)) {
+        rowIdx <- which(grepl(paste0("^",curWords[n-1],"$"),
+                              predictorVocabulary))
+        colIdx <- which(grepl(paste0("^",curWords[n],"$"),
+                                     predictorVocabulary))
+        transitionMatrix[rowIdx,colIdx] <- triTdm0[m]
+    }
+}
+
+for (m in seq_len(nrow(transitionMatrix))) {
+    curRowSum <- sum(transitionMatrix[m,])
+    
+    if (curRowSum > 0) {
+        transitionMatrix[m,] = transitionMatrix[m,] / curRowSum
+    } else {
+        transitionMatrix[m,m] = 1
+    }
+}
+
+textPredictor <- new("markovchain",
+                     transitionMatrix=transitionMatrix)
+
+for (m in seq_len(length(triTdm0))) {
+    print("-------------------------------------------")
+    print(triTdm0[m])
+    
+    curState <- unlist(str_split(names(triTdm0[m])," "))[1]
+    for (n in seq(1,2)) {
+        curCondProb <- conditionalDistribution(textPredictor,
+                                               curState)
+        maxIdx <- which.max(curCondProb)
+        nextState <- names(curCondProb[maxIdx])
+        print(sprintf("%s -> %s (P: %g)",curState,
+                                         nextState,
+                                         curCondProb[maxIdx]))
+        curState <- nextState
+    }    
+}
+```
+
+```{r predictor}
+load("./prediction.RData")
+
+predictorVocabulary <- character()
+for (n in seq_len(length(triTdm))) {
+    if (n %% 100 == 0) {
+        print(sprintf("%d (Out of %d)", n, length(triTdm)))
+    }
+    curWord <- unlist(str_split(names(triTdm[n])," "))
+
+    predictorVocabulary <- append(predictorVocabulary,
+                                  curWord[!curWord %in% predictorVocabulary])    
+}
+predictorVocabulary <- sort(predictorVocabulary)
 
 predictorVocabularySize <- length(predictorVocabulary)
 
