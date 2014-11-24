@@ -112,7 +112,7 @@ save(file="./prediction.RData",list=ls())
 
 ```{r predictor0}
 load("./prediction.RData")
-triTdm0 <- head(triTdm,n=5)
+triTdm0 <- head(triTdm,n=50)
 
 predictorVocabulary <- sort(unique(unlist(str_split(paste(names(triTdm0),
                                                           collapse=" "),
@@ -138,8 +138,14 @@ for (m in seq_len(length(triTdm0))) {
     }
 }
 
-for (m in seq_len(predictorVocabularySize)) {
-    transitionMatrix[m,] = transitionMatrix[m,] / sum(transitionMatrix[m,])
+for (m in seq_len(nrow(transitionMatrix))) {
+    curRowSum <- sum(transitionMatrix[m,])
+    
+    if (curRowSum > 0) {
+        transitionMatrix[m,] = transitionMatrix[m,] / curRowSum
+    } else {
+        transitionMatrix[m,m] = 1
+    }
 }
 
 textPredictor <- new("markovchain",
