@@ -23,7 +23,7 @@ source("./sampleTextFile.R")
 ```
 
 ```{r updateLineCorpus}
-updateLineCorpus <- FALSE
+updateLineCorpus <- TRUE
 if (updateLineCorpus)
     blackList <- read.csv("./Data/Terms-to-Block.csv",header=FALSE,skip=4)
     blackList <- blackList[,2]
@@ -68,6 +68,19 @@ if (updateLineCorpus)
     }
     save(file=lineCorpusFile, lineCorpus)    
 }
+```
+
+```{r testProcessChunk}
+textFilePath <- "./OutputData//en_US/"
+textFile <- "en_US.blogs1p00Percent.txt"
+lines_to_read <- 100
+h_conn <- file(file.path(textFilePath, textFile), "r", blocking=FALSE)
+cur_chunk <- readLines(h_conn, lines_to_read, skipNul=TRUE)
+close(h_conn)
+
+source("./formLineCorpus.R")
+c <- processDocumentChunk(c, blackList)
+tdm <- TermDocumentMatrix(c)
 ```
 
 ```{r loadData}
