@@ -16,6 +16,7 @@ shinyUI(pageWithSidebar(
     
     mainPanel(
         textInput("currentPhrase", "Enter Phrase", value = ""),
-        textOutput("text1")
+        h2("Suggested Terms"),
+        tableOutput('suggestedTerms')
     )
 ))
