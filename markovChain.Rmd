@@ -100,9 +100,12 @@ tdm <- as.matrix(TermDocumentMatrix(combinedCorpus))
 termFreqs <- sort(rowSums(tdm), decreasing=TRUE)
 termPDF <- termFreqs / sum(termFreqs)
 termCDF <- cumsum(termPDF)
+save(file="./termCDF.RData",termCDF)
 
 vocabulary <- sort(names(termCDF[1:which(termCDF >= 0.8)[1]]))
-save(file="./vocabulary.RData",vocabulary)
+vocabularySize <- length(vocabulary)
+termCDF <- termCDF[1:vocabularySize]
+save(file="./vocabulary.RData",vocabulary,termCDF)
 ```
 
 ```{r tokenizeTrigrams}
@@ -227,61 +230,61 @@ for (m in seq_len(length(commonTriTdm))) {
 }
 ```
 
-```{r predictor0}
+```{r}
+load(file="./transitionMatrix.RData")
+load(file="./vocabulary.RData")
 load("./prediction.RData")
-triTdm0 <- head(triTdm,n=50)
-
-predictorVocabulary <- sort(unique(unlist(str_split(paste(names(triTdm0),
-                                                          collapse=" "),
-                                                    " "))))
-
-predictorVocabularySize <- length(predictorVocabulary)
-
-transitionMatrix = matrix(numeric(predictorVocabularySize^2),
-                                  byrow=TRUE,
-                                  nrow=predictorVocabularySize,
-                                  dimnames=list(predictorVocabulary,
-                                                predictorVocabulary))
-
-for (m in seq_len(length(triTdm0))) {
-    curWords <- unlist(str_split(names(triTdm0[m])," "))
-    
-    for (n in seq(2,3)) {
-        rowIdx <- which(grepl(paste0("^",curWords[n-1],"$"),
-                              predictorVocabulary))
-        colIdx <- which(grepl(paste0("^",curWords[n],"$"),
-                                     predictorVocabulary))
-        transitionMatrix[rowIdx,colIdx] <- triTdm0[m]
-    }
-}
-
-for (m in seq_len(nrow(transitionMatrix))) {
-    curRowSum <- sum(transitionMatrix[m,])
-    
-    if (curRowSum > 0) {
-        transitionMatrix[m,] = transitionMatrix[m,] / curRowSum
-    } else {
-        transitionMatrix[m,m] = 1
-    }
-}
+testIdx <- seq_len(length(trigrams))
+testIdx <- testIdx[!testIdx %in% commonIdx]
 
 textPredictor <- new("markovchain",
                      transitionMatrix=transitionMatrix)
 
-for (m in seq_len(length(triTdm0))) {
-    print("-------------------------------------------")
-    print(triTdm0[m])
+vocabulary <- rownames(transitionMatrix)
+
+set.seed(1234)
+inputPhrase <- unlist(str_split(trigrams[commonIdx[1]]," "))
+inputPhrase <- inputPhrase[1:2]
+
+predictNextWord(inputPhrase, textPredictor)
+
+predictNextWord <- function(curPhrase,
+                            textPredictor) {
+    textPrediction <- list()
+    textPrediction$stateHistory <- character()
     
-    curState <- unlist(str_split(names(triTdm0[m])," "))[1]
-    for (n in seq(1,2)) {
-        curCondProb <- conditionalDistribution(textPredictor,
-                                               curState)
-        maxIdx <- which.max(curCondProb)
-        nextState <- names(curCondProb[maxIdx])
-        print(sprintf("%s -> %s (P: %g)",curState,
-                                         nextState,
-                                         curCondProb[maxIdx]))
+    numberWords <- length(curPhrase)
+    curState <- curPhrase[1]
+    vocabulary <- states(textPredictor)
+    
+    if (!curState %in% vocabulary) {
+        randomIdx <- floor(length(vocabulary) * runif(1)) + 1
+        curState <- vocabulary[randomIdx]
+    }
+
+    textPrediction$stateHistory <- 
+            append(textPrediction$stateHistory, curState)
+    
+    for (n in seq(2,numberWords)) {
+        nextState <- curPhrase[n]
+        if (!nextState %in% vocabulary) {
+            curConditionalProbability <- 
+                conditionalDistribution(textPredictor, curState)
+            
+            nextState <- names(which.max(curConditionalProbability))
+        }
         curState <- nextState
-    }    
+     
+        textPrediction$stateHistory <- 
+            append(textPrediction$stateHistory, curState)
+    }
+
+    textPrediction$conditionalProbability <- 
+        sort(conditionalDistribution(textPredictor, curState),
+             decreasing=TRUE)[1:4]
+    
+    return(textPrediction)
 }
+
+
 ```
