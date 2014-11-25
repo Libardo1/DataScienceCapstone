@@ -79,7 +79,7 @@ cur_chunk <- readLines(h_conn, lines_to_read, skipNul=TRUE)
 close(h_conn)
 
 source("./formLineCorpus.R")
-c <- processDocumentChunk(c, blackList)
+c <- processDocumentChunk(cur_chunk, blackList)
 tdm <- TermDocumentMatrix(c)
 ```
 

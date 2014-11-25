@@ -4,7 +4,7 @@ removeNonASCII <-
     content_transformer(function(x) iconv(x, "latin1", "ASCII", sub=""))
 
 customRemovePunctuation <- content_transformer(function(x) {
-    x <- tolower(x)
+    x <- gsub("[[:punct:]]"," ",tolower(x))
     return(x)
 })
 
