@@ -71,17 +71,6 @@ if (updateLineCorpus)
 load(lineCorpusFile)
 ```
 
-```{r prototypeMarkovChain, echo=FALSE}
-stateNames <- c("a","b","c")
-markovB <- new("markovchain",
-               transitionMatrix = matrix(c(0.2,0.5,0.3,
-                                           0,1,0,
-                                           0.1,0.8,0.1),
-                                         byrow=TRUE,
-                                         nrow=3,
-                                        dimnames=list(stateNames,stateNames)))
-```
-
 ```{r loadData}
 outputTextFileDirectory <- "./OutputData//en_US/"
 
@@ -112,6 +101,9 @@ tdm <- as.matrix(TermDocumentMatrix(combinedCorpus))
 termFreqs <- sort(rowSums(tdm), decreasing=TRUE)
 termPDF <- termFreqs / sum(termFreqs)
 termCDF <- cumsum(termPDF)
+
+vocabulary <- names(termCDF[1:which(termCDF >= 0.75)[1]])
+vocabulary <- sort(vocabulary[grep("^[^0-9]+$",vocabulary)])
 ```
 
 ```{r tokenizeTrigrams}
@@ -138,15 +130,9 @@ for (n in seq(1,length(combinedCorpus))) {
 triTdm <- sort(rowSums(as.matrix(triTdm)), decreasing=TRUE)
 save(file="./triTdm",triTdm,termPDF,termCDF)
 
+load("./triTdm")
 trigrams <- names(triTdm)
 commonIdx <- numeric()
-
-sixtyFivePercentIdx <- which(termCDF >= 0.65)[1]
-
-vocabularyCorpus <- 
-    Corpus(VectorSource(names(termCDF[1:sixtyFivePercentIdx])))
-
-vocabularyCorpus <- tm_map(vocabularyCorpus, removeWords, blackList)
 
 for (n in seq_len(length(trigrams))) {
     if (n %% 100 == 0) {
@@ -155,13 +141,85 @@ for (n in seq_len(length(trigrams))) {
     
     curWords <- unlist(str_split(trigrams[n]," "))
     
-    if (sum(curWords %in% vocabulary) >= 2) {
+    if (sum(curWords %in% vocabulary) == 3) {
         commonIdx <- append(commonIdx,n)
-        vocabulary <- append(vocabulary,curWords[!curWords %in% vocabulary])        
     }
 }
-vocabulary <- sort(vocabulary[grep("^[^0-9]+$",vocabulary)])
 save(file="./prediction.RData",list=ls())
+```
+
+```{r predictor}
+load("./prediction.RData")
+
+vocabularySize <- length(vocabulary)
+
+transitionMatrix = matrix(numeric(vocabularySize^2),
+                                  byrow=TRUE,
+                                  nrow=vocabularySize,
+                                  dimnames=list(vocabulary,
+                                                vocabulary))
+
+commonTriTdm <- triTdm[commonIdx]
+
+for (m in seq_len(length(commonTriTdm))) {
+    if (m %% 100 == 0) {
+        print(sprintf("Trigram #%d (Out of %d)",m,length(commonTriTdm)))
+    }
+    
+    curWords <- unlist(str_split(names(commonTriTdm[m])," "))
+    
+    for (n in seq(2,3)) {
+        rowIdx <- which(grepl(paste0("^",curWords[n-1],"$"), vocabulary))
+        colIdx <- which(grepl(paste0("^",curWords[n],"$"), vocabulary))
+        transitionMatrix[rowIdx,colIdx] <- commonTriTdm[m]
+    }
+}
+
+minProbability <- 0.01/(vocabularySize-1)
+
+for (m in seq_len(nrow(transitionMatrix))) {
+    curRowSum <- sum(transitionMatrix[m,])
+    
+    if (curRowSum > 0) {
+        transitionMatrix[m,] = transitionMatrix[m,] / curRowSum
+    } else {
+        transitionMatrix[m,m] = 0.99
+        
+        n <- seq_len(ncol(transitionMatrix))
+        n <- n[n != m]
+        transitionMatrix[m,n] <- minProbability
+    }
+}
+
+textPredictor <- new("markovchain",
+                     transitionMatrix=transitionMatrix)
+
+commonTriTdm <- triTdm[commonIdx]
+
+for (m in seq_len(length(triTdm))) {
+    print("-------------------------------------------")
+    print(commonTriTdm)
+    
+    curPhrase <- unlist(str_split(names(commonTriTdm[m])," "))
+    curState <- curPhrase[1]
+    
+    for (n in seq(1,2)) {
+        curCondProb <- conditionalDistribution(textPredictor,
+                                               curState)
+        
+        if (n == 1) {
+            maxIdx <- grep(paste0("^",curPhrase[n+1],"$"),vocabulary)
+        }else {
+            maxIdx <- which.max(curCondProb)    
+        }
+        
+        nextState <- names(curCondProb[maxIdx])
+        print(sprintf("%s -> %s (P: %g)",curState,
+                                         nextState,
+                                         curCondProb[maxIdx]))
+        curState <- nextState
+    } 
+}
 ```
 
 ```{r predictor0}
@@ -179,60 +237,6 @@ transitionMatrix = matrix(numeric(predictorVocabularySize^2),
                                   nrow=predictorVocabularySize,
                                   dimnames=list(predictorVocabulary,
                                                 predictorVocabulary))
-
-for (m in seq_len(length(triTdm0))) {
-    curWords <- unlist(str_split(names(triTdm0[m])," "))
-    
-    for (n in seq(2,3)) {
-        rowIdx <- which(grepl(paste0("^",curWords[n-1],"$"),
-                              predictorVocabulary))
-        colIdx <- which(grepl(paste0("^",curWords[n],"$"),
-                                     predictorVocabulary))
-        transitionMatrix[rowIdx,colIdx] <- triTdm0[m]
-    }
-}
-
-for (m in seq_len(nrow(transitionMatrix))) {
-    curRowSum <- sum(transitionMatrix[m,])
-    
-    if (curRowSum > 0) {
-        transitionMatrix[m,] = transitionMatrix[m,] / curRowSum
-    } else {
-        transitionMatrix[m,m] = 1
-    }
-}
-
-textPredictor <- new("markovchain",
-                     transitionMatrix=transitionMatrix)
-
-for (m in seq_len(length(triTdm0))) {
-    print("-------------------------------------------")
-    print(triTdm0[m])
-    
-    curState <- unlist(str_split(names(triTdm0[m])," "))[1]
-    for (n in seq(1,2)) {
-        curCondProb <- conditionalDistribution(textPredictor,
-                                               curState)
-        maxIdx <- which.max(curCondProb)
-        nextState <- names(curCondProb[maxIdx])
-        print(sprintf("%s -> %s (P: %g)",curState,
-                                         nextState,
-                                         curCondProb[maxIdx]))
-        curState <- nextState
-    }    
-}
-```
-
-```{r predictor}
-load("./prediction.RData")
-
-vocabularySize <- length(vocabulary)
-
-transitionMatrix = matrix(numeric(vocabularySize^2),
-                                  byrow=TRUE,
-                                  nrow=vocabularySize,
-                                  dimnames=list(vocabulary,
-                                                vocabulary))
 
 for (m in seq_len(length(triTdm0))) {
     curWords <- unlist(str_split(names(triTdm0[m])," "))
