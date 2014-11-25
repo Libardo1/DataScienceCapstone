@@ -3,6 +3,10 @@
 removeNonASCII <-
     content_transformer(function(x) iconv(x, "latin1", "ASCII", sub=""))
 
+# http://stackoverflow.com/questions/14281282/
+# how-to-write-custom-removepunctuation-function-to-better-deal-with-unicode-cha
+#
+# http://stackoverflow.com/questions/8697079/remove-all-punctuation-except-apostrophes-in-r
 customRemovePunctuation <- content_transformer(function(x) {
     x <- gsub("[[:punct:]]"," ",tolower(x))
     return(x)
