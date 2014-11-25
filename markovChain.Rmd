@@ -25,14 +25,21 @@ source("./sampleTextFile.R")
 ```{r updateLineCorpus}
 updateLineCorpus <- TRUE
 if (updateLineCorpus)
-    blackList <- read.csv("./Data/Terms-to-Block.csv",header=FALSE,skip=4)
-    blackList <- blackList[,2]
-    blackList <- gsub(",","",blackList)
-    blackList <- gsub(" ","",blackList)
-    blackList <- gsub("[0-9]+","",blackList)
-    blackList <- gsub("[\\.-]","",blackList)
-    blackList <- blackList[!grepl("^a$",blackList)]
-    blackList <- unique(blackList[blackList != ""])
+    blackListFile <- "./Data/Terms-to-Block.csv"
+
+    readBlackList <- function(blackListFile) {
+        blackList <- read.csv(blackListFile,header=FALSE,skip=4)
+        blackList <- blackList[,2]
+        blackList <- gsub(",","",blackList)
+        blackList <- gsub(" ","",blackList)
+        blackList <- gsub("[0-9]+","",blackList)
+        blackList <- gsub("[\\.-]","",blackList)
+        blackList <- blackList[!grepl("^a$",blackList)]
+        blackList <- unique(blackList[blackList != ""])
+        return(blackList)
+    }
+
+    blackList <- readBlackList(blackListFile)
 
     outputTextFileDirectory <- "./OutputData//en_US/"
     percentageToSample <- 1
