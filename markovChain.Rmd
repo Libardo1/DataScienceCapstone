@@ -134,7 +134,7 @@ if (!file.exists(trigramTDMFile)) {
 load(trigramTDMFile)
 ```
 
-```{r}
+```{r initializeCommonTrigrams}
 trigrams <- names(triTdm)
 commonIdx <- numeric()
 
@@ -194,15 +194,16 @@ for (m in seq_len(nrow(transitionMatrix))) {
         transitionMatrix[m,n] <- minProbability
     }
 }
+save(file="./transitionMatrix.RData",transitionMatrix)
 
 textPredictor <- new("markovchain",
                      transitionMatrix=transitionMatrix)
 
 commonTriTdm <- triTdm[commonIdx]
 
-for (m in seq_len(length(triTdm))) {
+for (m in seq_len(length(commonTriTdm))) {
     print("-------------------------------------------")
-    print(commonTriTdm)
+    print(commonTriTdm[m])
     
     curPhrase <- unlist(str_split(names(commonTriTdm[m])," "))
     curState <- curPhrase[1]
@@ -214,7 +215,7 @@ for (m in seq_len(length(triTdm))) {
         if (n == 1) {
             maxIdx <- grep(paste0("^",curPhrase[n+1],"$"),vocabulary)
         }else {
-            maxIdx <- which.max(curCondProb)    
+            maxIdx <- which.max(curCondProb)
         }
         
         nextState <- names(curCondProb[maxIdx])
