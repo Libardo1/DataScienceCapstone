@@ -68,7 +68,6 @@ if (updateLineCorpus)
     }
     save(file=lineCorpusFile, lineCorpus)    
 }
-load(lineCorpusFile)
 ```
 
 ```{r loadData}
@@ -107,30 +106,39 @@ vocabulary <- sort(vocabulary[grep("^[^0-9]+$",vocabulary)])
 ```
 
 ```{r tokenizeTrigrams}
-TrigramTokenizer <- function(x) {
-    RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 3, max = 3))
-}
-
-for (n in seq(1,length(combinedCorpus))) {
-    if (n %% 10 == 0) {
-        print(sprintf("line #%d", n))    
+trigramTDMFile <- "./triTdm.RData"
+if (!file.exists(trigramTDMFile)) {
+    TrigramTokenizer <- function(x) {
+        RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 3, max = 3))
     }
     
-    lineCorpus <- Corpus(VectorSource(as.character(combinedCorpus[[n]])))
-
-    curTdm <- TermDocumentMatrix(lineCorpus,
-                                 control = list(tokenize = TrigramTokenizer))
+    for (n in seq(1,length(combinedCorpus))) {
+        if (n %% 10 == 0) {
+            print(sprintf("line #%d", n))    
+        }
+        
+        lineCorpus <- Corpus(VectorSource(as.character(combinedCorpus[[n]])))
     
-    if (n == 1) {
-        triTdm <- curTdm
-    } else {
-        triTdm <- c(triTdm,curTdm)
+        curTdm <- TermDocumentMatrix(lineCorpus,
+                                     control = list(tokenize = TrigramTokenizer))
+        
+        if (n == 1) {
+            triTdm <- curTdm
+        } else {
+            triTdm <- c(triTdm,curTdm)
+        }
     }
+    triTdm <- sort(rowSums(as.matrix(triTdm)), decreasing=TRUE)
+    save(file=trigramTDMFile,
+         triTdm,
+         termPDF,
+         termCDF,
+         vocabulary)
 }
-triTdm <- sort(rowSums(as.matrix(triTdm)), decreasing=TRUE)
-save(file="./triTdm",triTdm,termPDF,termCDF)
+load(trigramTDMFile)
+```
 
-load("./triTdm")
+```{r}
 trigrams <- names(triTdm)
 commonIdx <- numeric()
 

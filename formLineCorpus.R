@@ -3,7 +3,16 @@
 removeNonASCII <-
     content_transformer(function(x) iconv(x, "latin1", "ASCII", sub=""))
 
-convertToLowerCase <- content_transformer(function(x) tolower(x))
+# http://stackoverflow.com/questions/14281282/
+# how-to-write-custom-removepunctuation-function-to-better-deal-with-unicode-cha1
+replaceExpressions <- function(x) UseMethod("replaceExpressions", x)
+
+#http://stackoverflow.com/questions/8697079/remove-all-punctuation-except-apostrophes-in-r
+replaceExpressions.PlainTextDocument <- replaceExpressions.character  <- function(x) {
+    x <- gsub("[[:punct:]]", " ", x)
+    x <- tolower(x)
+    return(x)
+}
 
 formLineCorpus <- function(textFilePath,
                            textFile,
@@ -121,12 +130,12 @@ processDocumentChunk <- function(cur_chunk,
     curChunkCorpus <- Corpus(VectorSource(cur_chunk))
     
     curChunkCorpus <- tm_map(curChunkCorpus, removeNonASCII)
-    
-    curChunkCorpus <- tm_map(curChunkCorpus, removePunctuation)
+
+    curChunkCorpus <- tm_map(curChunkCorpus, replaceExpressions)
+
+    curChunkCorpus <- tm_map(curChunkCorpus, removeNumbers)
     
     curChunkCorpus <- tm_map(curChunkCorpus, stripWhitespace)
-    
-    curChunkCorpus <- tm_map(curChunkCorpus, convertToLowerCase)
     
     curChunkCorpus <- tm_map(curChunkCorpus, removeWords, blackList)    
     
