@@ -52,6 +52,7 @@ preprocessTextInput <- function(textInput) {
 }
 
 predictNextWord <- function(curPhrase,
+                            numberOfTerms,
                             textPredictor) {
     textPrediction <- list()
     textPrediction$stateHistory <- character()
@@ -84,7 +85,7 @@ predictNextWord <- function(curPhrase,
     
     textPrediction$conditionalProbability <- 
         sort(conditionalDistribution(textPredictor, curState),
-             decreasing=TRUE)[1:4]
+             decreasing=TRUE)[1:numberOfTerms]
     
     return(textPrediction)
 }
@@ -93,28 +94,28 @@ blackList <- readBlackList("./Terms-to-Block.csv")
 
 load(file="./transitionMatrix.RData")
 
-#textPredictor <- new("markovchain",
-#                     transitionMatrix=transitionMatrix)
+textPredictor <- new("markovchain",
+                     transitionMatrix=transitionMatrix)
+
+print("Model Loaded")
+
+# http://withr.me/blog/2014/01/03/add-calculation-in-process-indictor-for-shiny-application/
 
 shinyServer(function(input, output) {
     # http://stackoverflow.com/questions/22251956/
     # r-shiny-how-to-output-a-good-looking-matrix-using-rendertable
     output$suggestedTerms = renderTable({
-        #http://r.789695.n4.nabble.com/length-of-empty-string-td4083712.html
-        if (input$currentPhrase != "") {
-            currentPhrase <- preprocessTextInput(input$currentPhrase)
-            
-            #textPrediction <- predictNextWord(currentPhrase, textPredictor)
-            
-            #suggestedTerms <- 
-            #    t(as.matrix(textPrediction$conditionalProbability))
+        #http://r.789695.n4.nabble.com/length-of-empty-string-td4083712.html        
+        currentPhrase <- preprocessTextInput(input$currentPhrase)
         
-            #rownames(suggestedTerms) <- "P(term)"
-            suggestedTerms <- matrix()
-        }
-        else {
-            suggestedTerms <- matrix()
-        }
+        textPrediction <- predictNextWord(currentPhrase,
+                                          input$numberOfTerms,
+                                          textPredictor)
+
+        suggestedTerms <- 
+            t(as.matrix(textPrediction$conditionalProbability))
+        
+        rownames(suggestedTerms) <- "P(term)"
 
         return(suggestedTerms)
     })

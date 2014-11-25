@@ -16,7 +16,14 @@ shinyUI(pageWithSidebar(
     
     mainPanel(
         textInput("currentPhrase", "Enter Phrase", value = ""),
-        h2("Suggested Terms"),
-        tableOutput('suggestedTerms')
+        tabsetPanel(
+            tabPanel("Suggested Terms",
+                     div(class="suggestedTerms", checked=NA,
+                         p(paste("This tab displays the requested number of",
+                                 "potential next words that is computed by",
+                                 "a Markov Chain model"))),
+                     tableOutput('suggestedTerms')
+            )
+        )
     )
 ))
