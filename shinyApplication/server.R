@@ -106,7 +106,7 @@ textPredictor <- new("markovchain",
 
 shinyServer(function(input, output) {
     output$serverStatus <- renderText({
-        "Initialized"
+        "Text predictor initialized"
     })
     
     # http://stackoverflow.com/questions/22251956/
