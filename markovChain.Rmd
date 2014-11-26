@@ -108,9 +108,10 @@ termFreqs <- sort(rowSums(tdm), decreasing=TRUE)
 termPDF <- termFreqs / sum(termFreqs)
 termCDF <- cumsum(termPDF)
 save(file="./termCDF.RData",termCDF)
+```
 
+```{r initializeVocabulary}
 load(file="./termCDF.RData")
-
 vocabulary <- sort(names(termCDF[1:which(termCDF >= 0.63)[1]]))
 vocabularySize <- length(vocabulary)
 termCDF <- termCDF[1:vocabularySize]
@@ -207,7 +208,9 @@ for (m in seq_len(nrow(transitionMatrix))) {
     }
 }
 save(file="./transitionMatrix.RData",transitionMatrix)
+```
 
+```{r testPredictor}
 textPredictor <- new("markovchain",
                      transitionMatrix=transitionMatrix)
 

@@ -1,3 +1,5 @@
+options(shiny.maxRequestSize=40*1024^2)
+
 library(rJava)
 library(RWeka)
 library(R.utils)
@@ -81,6 +83,11 @@ predictNextWord <- function(curPhrase,
                 conditionalDistribution(textPredictor, curState)
             
             nextState <- names(which.max(curConditionalProbability))
+            
+            if (length(nextState) > 1) {
+                randomIdx <- floor(length(nextState) * runif(1)) + 1
+                nextState <- nextState[randomIdx]
+            }
         }
         curState <- nextState
         
