@@ -34,7 +34,8 @@ readBlackList <- function(blackListFile) {
     return(blackList)
 }
 
-preprocessTextInput <- function(textInput) {
+preprocessTextInput <- function(textInput,
+                                blackList) {
     textInputCorpus <- Corpus(VectorSource(textInput))
     
     textInputCorpus <- tm_map(textInputCorpus, removeNonASCII)
@@ -49,6 +50,10 @@ preprocessTextInput <- function(textInput) {
     
     predictorInput <- 
         unlist(str_split(as.character(textInputCorpus[[1]])," "))
+    
+    predictorInput <- predictorInput[predictorInput != ""]
+    
+    return(predictorInput)
 }
 
 predictNextWord <- function(curPhrase,
@@ -104,17 +109,20 @@ shinyServer(function(input, output) {
     # r-shiny-how-to-output-a-good-looking-matrix-using-rendertable
     output$suggestedTerms = renderTable({
         #http://r.789695.n4.nabble.com/length-of-empty-string-td4083712.html        
-        currentPhrase <- preprocessTextInput(input$currentPhrase)
+        currentPhrase <- preprocessTextInput(input$currentPhrase,
+                                             blackList)
         
-        textPrediction <- predictNextWord(currentPhrase,
-                                          input$numberOfTerms,
-                                          textPredictor)
-
-        suggestedTerms <- 
-            t(as.matrix(textPrediction$conditionalProbability))
-        
-        rownames(suggestedTerms) <- "P(term)"
-
-        return(suggestedTerms)
+        if (length(currentPhrase) > 0) {
+            textPrediction <- predictNextWord(currentPhrase,
+                                              input$numberOfTerms,
+                                              textPredictor)
+            
+            suggestedTerms <- 
+                t(as.matrix(textPrediction$conditionalProbability))
+            
+            rownames(suggestedTerms) <- "P(term)"
+            
+            return(suggestedTerms)
+        }
     })
 })
