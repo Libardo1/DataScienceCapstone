@@ -97,8 +97,6 @@ load(file="./transitionMatrix.RData")
 textPredictor <- new("markovchain",
                      transitionMatrix=transitionMatrix)
 
-print("Model Loaded")
-
 # http://withr.me/blog/2014/01/03/add-calculation-in-process-indictor-for-shiny-application/
 
 shinyServer(function(input, output) {
