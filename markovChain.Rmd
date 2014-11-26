@@ -112,7 +112,7 @@ save(file="./termCDF.RData",termCDF)
 
 ```{r initializeVocabulary}
 load(file="./termCDF.RData")
-vocabulary <- sort(names(termCDF[1:which(termCDF >= 0.7)[1]]))
+vocabulary <- sort(names(termCDF[1:which(termCDF >= 0.78)[1]]))
 vocabularySize <- length(vocabulary)
 termCDF <- termCDF[1:vocabularySize]
 save(file="./vocabulary.RData",vocabulary,termCDF)
@@ -213,10 +213,11 @@ save(file="./transitionMatrix.RData",transitionMatrix)
 ```{r testPredictor}
 textPredictor <- new("markovchain",
                      transitionMatrix=transitionMatrix)
+rm(transitionMatrix)
 
 commonTriTdm <- triTdm[commonIdx]
 
-for (m in seq_len(length(commonTriTdm))) {
+for (m in seq_len(length(commonTriTdm[1:10]))) {
     print("-------------------------------------------")
     print(commonTriTdm[m])
     

@@ -1,5 +1,5 @@
 #https://groups.google.com/forum/#!msg/shiny-discuss/IFpkIuPTVRU/P3D4AuNRkUAJ
-options(shiny.maxRequestSize=40*1024^2)
+options(shiny.maxRequestSize=95*1024^2)
 
 library(rJava)
 library(RWeka)
