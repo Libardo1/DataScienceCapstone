@@ -18,10 +18,12 @@ shinyUI(pageWithSidebar(
 
     #http://stackoverflow.com/questions/17930985/conditional-output-shiny-ui
     mainPanel(
-        conditionalPanel(condition = "output.serverStatus != 'Text predictor initialized'",
+        conditionalPanel(condition = paste("output.serverStatus !=",
+                                           "'Text predictor initialized'"),
                          div(class="initializationStatus"), checked=NA,
                          h3("Text predictor initialization in progress")),
-        conditionalPanel(condition = "output.serverStatus != 'Text predictor initialized'",
+        conditionalPanel(condition = paste("output.serverStatus !=",
+                                           "'Text predictor initialized'"),
                          textOutput("serverStatus")),
         textInput("currentPhrase", "Enter Phrase", value = ""),
         tabsetPanel(
