@@ -14,6 +14,7 @@ shinyUI(pageWithSidebar(
         submitButton(text = "Apply Changes", icon = NULL)
     )),
     
+    #http://stackoverflow.com/questions/17930985/conditional-output-shiny-ui
     mainPanel(
         textInput("currentPhrase", "Enter Phrase", value = ""),
         tabsetPanel(
@@ -22,7 +23,9 @@ shinyUI(pageWithSidebar(
                          p(paste("This tab displays the requested number of",
                                  "potential next words that is computed by",
                                  "a Markov Chain model"))),
-                     tableOutput('suggestedTerms')
+                     conditionalPanel(
+                         condition="input.currentPhrase != ''",
+                         tableOutput('suggestedTerms'))
             )
         )
     )
