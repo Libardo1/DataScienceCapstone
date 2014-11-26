@@ -1,3 +1,4 @@
+#https://groups.google.com/forum/#!msg/shiny-discuss/IFpkIuPTVRU/P3D4AuNRkUAJ
 options(shiny.maxRequestSize=40*1024^2)
 
 library(rJava)
@@ -108,6 +109,7 @@ load(file="./transitionMatrix.RData")
 
 textPredictor <- new("markovchain",
                      transitionMatrix=transitionMatrix)
+rm(transitionMatrix)
 
 # http://withr.me/blog/2014/01/03/add-calculation-in-process-indictor-for-shiny-application/
 
