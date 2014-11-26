@@ -105,6 +105,10 @@ textPredictor <- new("markovchain",
 # http://withr.me/blog/2014/01/03/add-calculation-in-process-indictor-for-shiny-application/
 
 shinyServer(function(input, output) {
+    output$serverStatus <- renderText({
+        "Initialized"
+    })
+    
     # http://stackoverflow.com/questions/22251956/
     # r-shiny-how-to-output-a-good-looking-matrix-using-rendertable
     output$suggestedTerms = renderTable({

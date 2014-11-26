@@ -16,6 +16,10 @@ shinyUI(pageWithSidebar(
     
     #http://stackoverflow.com/questions/17930985/conditional-output-shiny-ui
     mainPanel(
+        conditionalPanel(condition = "output.serverStatus != 'Initialized'",
+                         div(class="initializationStatus"), checked=NA,
+                         p("Text Predictor initialization in progress")),
+        textOutput("serverStatus"),
         textInput("currentPhrase", "Enter Phrase", value = ""),
         tabsetPanel(
             tabPanel("Suggested Terms",
