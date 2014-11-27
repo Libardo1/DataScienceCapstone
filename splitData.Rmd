@@ -5,19 +5,72 @@ output: html_document
 Generates 60% / 20% / 20% split of data
 
 ```{r setupEnvironment}
+library(rJava)
+library(RWeka)
+library(R.utils)
+library(stringi)
+library(stringr)
+library(shiny)
+library(textcat)
+library(tm)
+library(markovchain)
+
 source("./sampleTextFile.R")
+source("./formLineCorpus.R")
+
+blackList <- readBlackList("./Data/Terms-to-Block.csv")
 ```
 
-```{r }
+```{r prototypeModelConstruction0}
+set.seed(18244)
 outputTextFileDirectory <- "./OutputData//en_US/"
 load("./OutputData//en_US/en_USNumLines.RData")
 
 inputTextFilePath <- "./Data/final/en_US//en_US.blogs.txt"
 num_lines_to_read <- ceiling(num_lines[[basename(inputTextFilePath)]][1]/100)
 
-validateChunkSampling(8993)
+h_conn <- file(inputTextFilePath, "r", blocking=FALSE)
+cur_chunk <- readLines(h_conn, num_lines_to_read, skipNul=TRUE)
+close(h_conn)
+
+chunkSampling <- initializeChunkSampling(length(cur_chunk))
+
+curTrainingData <- cur_chunk[chunkSampling$train_data_idx]
+curTestData <- cur_chunk[chunkSampling$test_data_idx]
+curValidationData <- cur_chunk[chunkSampling$validation_data_idx]
+
+curLineCorpus <- processDocumentChunk(curTrainingData, blackList)
+tdm <- TermDocumentMatrix(curLineCorpus)
+
+tdm0 <- sort(rowSums(as.matrix(tdm)),decreasing=TRUE)
+normFactor <- sum(tdm0)
+termPDF0 <- tdm0 / normFactor
+termCDF0 <- cumsum(termPDF0)
+
+tdm1 <- sort(rowSums(as.matrix(removeSparseTerms(tdm,0.999))),decreasing=TRUE)
+termPDF1 <- tdm1 / normFactor
+termCDF1 <- cumsum(termPDF1)
+length(termCDF1)
+```
+
+```{r}
+set.seed(18244)
+outputTextFileDirectory <- "./OutputData//en_US/"
+load("./OutputData//en_US/en_USNumLines.RData")
+
+inputTextFilePath <- "./Data/final/en_US//en_US.blogs.txt"
+num_lines_to_read <- ceiling(num_lines[[basename(inputTextFilePath)]][1]/100)
 
 h_conn <- file(inputTextFilePath, "r", blocking=FALSE)
-cur_chunk <- readLines(h_conn, lines_to_read, skipNul=TRUE)
+cur_chunk <- readLines(h_conn, num_lines_to_read, skipNul=TRUE)
 close(h_conn)
+
+chunkSampling <- initializeChunkSampling(length(cur_chunk))
+
+curTrainingData <- cur_chunk[chunkSampling$train_data_idx]
+curTestData <- cur_chunk[chunkSampling$test_data_idx]
+curValidationData <- cur_chunk[chunkSampling$validation_data_idx]
+
+curLineCorpus <- processDocumentChunk(curTrainingData, blackList)
+tdm <- TermDocumentMatrix(curLineCorpus)
 ```

@@ -41,15 +41,26 @@ preprocessTextInput <- function(textInput,
                                 blackList) {
     textInputCorpus <- Corpus(VectorSource(textInput))
     
-    textInputCorpus <- tm_map(textInputCorpus, removeNonASCII)
+    textInputCorpus <- tm_map(textInputCorpus,
+                              removeNonASCII,
+                              mc.cores=1)
     
-    textInputCorpus <- tm_map(textInputCorpus, customRemovePunctuation)
+    textInputCorpus <- tm_map(textInputCorpus,
+                              customRemovePunctuation,
+                              mc.cores=1)
     
-    textInputCorpus <- tm_map(textInputCorpus, removeNumbers)
+    textInputCorpus <- tm_map(textInputCorpus,
+                              removeNumbers,
+                              mc.cores=1)
     
-    textInputCorpus <- tm_map(textInputCorpus, stripWhitespace)
+    textInputCorpus <- tm_map(textInputCorpus,
+                              stripWhitespace,
+                              mc.cores=1)
     
-    textInputCorpus <- tm_map(textInputCorpus, removeWords, blackList)
+    textInputCorpus <- tm_map(textInputCorpus,
+                              removeWords,
+                              blackList,
+                              mc.cores=1)
     
     predictorInput <- 
         unlist(str_split(as.character(textInputCorpus[[1]])," "))
