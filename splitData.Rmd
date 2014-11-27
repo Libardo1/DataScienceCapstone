@@ -53,16 +53,7 @@ termCDF1 <- cumsum(termPDF1)
 length(termCDF1)
 
 chunkSparsity <- 0.999
-```
 
-```{r}
-set.seed(18244)
-outputTextFileDirectory <- "./OutputData//en_US/"
-load("./OutputData//en_US/en_USNumLines.RData")
-
-inputTextFilePath <- "./Data/final/en_US//en_US.blogs.txt"
-
-splitTextData(inputTextFilePath, num_lines)
 
 curLineCorpus0 <- processDocumentChunk(curTrainingData0, blackList)
 tdm0 <- removeSparseTerms(TermDocumentMatrix(curLineCorpus0), chunkSparsity)
@@ -82,5 +73,15 @@ termCDF3 <- cumsum(termPDF3)
 length(termCDF3)
 
 close(h_conn)
+```
+
+```{r splitTextData}
+set.seed(18244)
+outputTextFileDirectory <- "./OutputData//en_US/"
+load("./OutputData//en_US/en_USNumLines.RData")
+
+inputTextFilePath <- "./Data/final/en_US//en_US.blogs.txt"
+
+splitTextData(inputTextFilePath, num_lines)
 
 ```
