@@ -1,5 +1,67 @@
 source("./initializeSamplingString.R")
 
+initializeChunkSampling <- function(curNumLinesToRead) {
+    #------------------------------------------------------------------
+    # Initializes the sampling of a file chunk
+    #
+    # Args:
+    #   curNumLinesToRead: Integer that stores the number of lines to
+    #                      read from a text file
+    #
+    # Returns:
+    #   chunkSampling: List that stores a description of the current
+    #                  file chunk sampling
+    #------------------------------------------------------------------
+    line_idx <- seq(1,curNumLinesToRead)
+    
+    chunkSampling <- list()
+    
+    chunkSampling$train_data_idx <- 
+        which(rbinom(curNumLinesToRead,1,0.6) == 1)
+    
+    line_idx <- 
+        line_idx[!line_idx %in% chunkSampling$train_data_idx]
+    
+    chunkSampling$test_data_idx <- 
+        line_idx[which(rbinom(length(line_idx),1,0.5) == 1)]
+    
+    chunkSampling$validation_data_idx = 
+        line_idx[!line_idx %in% chunkSampling$test_data_idx]    
+    
+    return(chunkSampling)
+}
+
+validateChunkSampling <- function(curNumLinesToRead) {
+    #------------------------------------------------------------------
+    # initializeChunkSampling() unit test
+    #
+    # Args:
+    #   curNumLinesToRead: Integer that stores the number of lines to
+    #                      read from a text file
+    #
+    # Returns:
+    #   None
+    #------------------------------------------------------------------
+    chunkSampling <- initializeChunkSampling(curNumLinesToRead)
+    
+    percentSampling <- c(length(chunkSampling$train_data_idx),
+                         length(chunkSampling$test_data_idx),
+                         length(chunkSampling$validation_data_idx))
+    
+    if (sum(percentSampling) == curNumLinesToRead) {
+        print('# of samples match')
+    }else {
+        errorobj <- simpleError('# of lines changed')
+        stop(errorobj)
+    }
+    
+    percentSampling <- percentSampling / sum(percentSampling)
+    
+    print(sprintf('Training data: %.2f%%', percentSampling[1]))
+    print(sprintf('Test data: %.2f%%', percentSampling[2]))
+    print(sprintf('Validation data: %.2f%%', percentSampling[3]))
+}
+
 sampleTextFile <- function(inputTextFilePath,
                            num_lines,
                            percentageToSample,

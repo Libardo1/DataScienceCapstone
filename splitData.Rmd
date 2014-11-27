@@ -1,0 +1,23 @@
+---
+title: "SplitData"
+output: html_document
+---
+Generates 60% / 20% / 20% split of data
+
+```{r setupEnvironment}
+source("./sampleTextFile.R")
+```
+
+```{r }
+outputTextFileDirectory <- "./OutputData//en_US/"
+load("./OutputData//en_US/en_USNumLines.RData")
+
+inputTextFilePath <- "./Data/final/en_US//en_US.blogs.txt"
+num_lines_to_read <- ceiling(num_lines[[basename(inputTextFilePath)]][1]/100)
+
+validateChunkSampling(8993)
+
+h_conn <- file(inputTextFilePath, "r", blocking=FALSE)
+cur_chunk <- readLines(h_conn, lines_to_read, skipNul=TRUE)
+close(h_conn)
+```
