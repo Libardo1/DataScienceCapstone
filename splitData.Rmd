@@ -51,6 +51,8 @@ tdm1 <- sort(rowSums(as.matrix(removeSparseTerms(tdm,0.999))),decreasing=TRUE)
 termPDF1 <- tdm1 / normFactor
 termCDF1 <- cumsum(termPDF1)
 length(termCDF1)
+
+chunkSparsity <- 0.999
 ```
 
 ```{r}
@@ -59,18 +61,26 @@ outputTextFileDirectory <- "./OutputData//en_US/"
 load("./OutputData//en_US/en_USNumLines.RData")
 
 inputTextFilePath <- "./Data/final/en_US//en_US.blogs.txt"
-num_lines_to_read <- ceiling(num_lines[[basename(inputTextFilePath)]][1]/100)
 
-h_conn <- file(inputTextFilePath, "r", blocking=FALSE)
-cur_chunk <- readLines(h_conn, num_lines_to_read, skipNul=TRUE)
+splitTextData(inputTextFilePath, num_lines)
+
+curLineCorpus0 <- processDocumentChunk(curTrainingData0, blackList)
+tdm0 <- removeSparseTerms(TermDocumentMatrix(curLineCorpus0), chunkSparsity)
+
+curLineCorpus1 <- processDocumentChunk(curTrainingData1, blackList)
+tdm1 <- removeSparseTerms(TermDocumentMatrix(curLineCorpus1), chunkSparsity)
+
+tdm2 <- c(tdm0,tdm1)
+termPDF <- sort(rowSums(as.matrix(tdm2)),decreasing=TRUE)
+termPDF <- termPDF / sum(termPDF)
+termCDF <- cumsum(termPDF)
+
+tdm3 <- removeSparseTerms(tdm2, termDocumentMatrixSparsity)
+termPDF3 <- sort(rowSums(as.matrix(tdm3)),decreasing=TRUE)
+termPDF3 <- termPDF3 / sum(termPDF3)
+termCDF3 <- cumsum(termPDF3)
+length(termCDF3)
+
 close(h_conn)
 
-chunkSampling <- initializeChunkSampling(length(cur_chunk))
-
-curTrainingData <- cur_chunk[chunkSampling$train_data_idx]
-curTestData <- cur_chunk[chunkSampling$test_data_idx]
-curValidationData <- cur_chunk[chunkSampling$validation_data_idx]
-
-curLineCorpus <- processDocumentChunk(curTrainingData, blackList)
-tdm <- TermDocumentMatrix(curLineCorpus)
 ```

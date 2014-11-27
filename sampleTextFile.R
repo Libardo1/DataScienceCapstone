@@ -161,6 +161,85 @@ sampleTextFile <- function(inputTextFilePath,
     return(sample_line_idx)
 }
 
+splitTextData <- function(inputTextFilePath,
+                          num_lines) {
+    #--------------------------------------------------------------------
+    # Splits a text data file into training, testing, & validation 
+    # data sets
+    #
+    # Args:
+    #   inTextFilePath: Full path to the input text file
+    #
+    #   num_lines: List that stores the number of lines of each text file
+    #              contained in a directory
+    #
+    # Returns:
+    #   None
+    #--------------------------------------------------------------------
+    total_num_lines <- num_lines[[basename(inputTextFilePath)]][1]
+    num_lines_to_read <- ceiling(total_num_lines/100)
+    
+    filePrefix <- unlist(str_split(basename(inputTextFilePath),"\\.txt"))[1]
+    
+    trainingDataPath <- file.path(outputTextFileDirectory,
+                                  paste0(filePrefix,"_TrainingData.txt"))
+    
+    testDataPath <- file.path(outputTextFileDirectory,
+                              paste0(filePrefix,"_TestData.txt"))
+    
+    validationDataPath <- file.path(outputTextFileDirectory,
+                                    paste0(filePrefix,"_ValidationData.txt"))
+    
+    h_inputConn <- file(inputTextFilePath, "r", blocking=FALSE)
+    
+    h_trainingDataConn <- file(trainingDataPath, "w")
+    h_testDataConn <- file(testDataPath, "w")
+    h_validationDataConn <- file(validationDataPath, "w")
+    
+    lines_read <- 0
+    repeat {
+        cur_chunk <- readLines(h_inputConn, num_lines_to_read, skipNul=TRUE)
+        
+        if (length(cur_chunk) == 0) {
+            break
+        }
+        else {
+            lines_read <- lines_read + length(cur_chunk)
+            
+            print("---------------------------------------------------")
+            
+            print(sprintf('Read %d lines (Out of %d)', lines_read,
+                          total_num_lines))
+            
+            chunkSampling <- initializeChunkSampling(length(cur_chunk))
+            
+            percentSampling <- c(length(chunkSampling$train_data_idx),
+                                 length(chunkSampling$test_data_idx),
+                                 length(chunkSampling$validation_data_idx))
+            
+            percentSampling <- 100*percentSampling/sum(percentSampling)
+            
+            print(sprintf('Training data: %.2f%%', percentSampling[1]))
+            print(sprintf('Test data: %.2f%%', percentSampling[2]))
+            print(sprintf('Validation data: %.2f%%', percentSampling[3]))
+            
+            write(cur_chunk[chunkSampling$train_data_idx],
+                  file=h_trainingDataConn)
+            
+            write(cur_chunk[chunkSampling$test_data_idx],
+                  file=h_testDataConn)
+            
+            write(cur_chunk[chunkSampling$validation_data_idx],
+                  file=h_validationDataConn)
+        }
+    }
+    
+    close(h_inputConn)
+    close(h_trainingDataConn)
+    close(h_testDataConn)
+    close(h_validationDataConn)
+}
+
 sampleTextFileUnitTest <- function(textFilePath,
                                    num_lines,
                                    numberOfLinesToRead,
