@@ -138,12 +138,15 @@ repeat {
             
             print(sprintf("Current number of terms: %d", nrow(termFreqs)))
         }
+    } else {
+        break
     }
 }
 close(h_conn)
 filePrefix <- unlist(str_split(basename(inputTextFilePath),"\\.txt"))[1]
 save(file=file.path(outputTextFileDirectory,paste0(filePrefix,
-                                                   "Terms.RData")),tdm)
+                                                   "Terms.RData")),
+     termFreqs, word_count)
 ```
 
 ```{r prototypeModelConstruction0}
