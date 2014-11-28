@@ -1,0 +1,58 @@
+---
+title: "Construct Text Model"
+output: html_document
+---
+1.) Generates 60% / 20% / 20% split of data
+2.) Analyzes training data unigram statistics
+3.) Constructs Markov chain transition matrix
+based on triagram statistics
+
+```{r setupEnvironment}
+library(rJava)
+library(RWeka)
+library(R.utils)
+library(stringi)
+library(stringr)
+library(shiny)
+library(textcat)
+library(tm)
+library(markovchain)
+
+source("./sampleTextFile.R")
+source("./formLineCorpus.R")
+source("./determineTextFileSize.R")
+source("./analyzeUnigramStatistics.R")
+
+blackList <- readBlackList("./Data/Terms-to-Block.csv")
+```
+
+```{r splitTextData}
+set.seed(18244)
+
+inputTextDataPath <- "./Data/final/en_US"
+outputTextFileDirectory <- "./OutputData//en_US/"
+load("./OutputData//en_US/en_USNumLines.RData")
+
+splitTextDataFiles(inputTextDataPath,
+                   outputTextFileDirectory,
+                   num_lines)
+
+determineSplitTextDataNumLines(outputTextFileDirectory)
+```
+
+```{r analyzeUnigramStatistics}
+outputTextFileDirectory <- "./OutputData//en_US/"
+
+load(file.path(outputTextFileDirectory,
+               "splitTextDataNumLines.RData"))
+
+analyzeTextDataUnigramStatistics(outputTextFileDirectory,
+                                 ".*TrainingData.txt",
+                                 num_lines,
+                                 blackList)
+```
+
+```{r constructTransitionMatrix}
+load("./OutputData//en_US/en_US.blogs_TrainingDataTerms.RData")
+```
+
