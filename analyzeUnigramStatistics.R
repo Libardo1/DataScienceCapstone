@@ -25,6 +25,30 @@ computeTermFrequencies <- function(curTDM) {
     return(curTermFreq)
 }
 
+mergeTermFrequencyDataTables <- function(termFreqsX,
+                                         termFreqsY) {
+    #-----------------------------------------------------------------
+    # Merges two data tables that store term frequencies
+    #
+    # Args:
+    #   termFreqsX: Data frame that contains term frequencies
+    #
+    #   termFreqsY: Data frame that contains term frequencies
+    #
+    # Returns:
+    #   mergedTermFreqs: Data frame that contains term frequencies
+    #-----------------------------------------------------------------
+    mergedTermFreqs <- merge(termFreqsX, termFreqsY, all=TRUE)
+    mergedTermFreqs$count.x[is.na(mergedTermFreqs$count.x)] = 0
+    mergedTermFreqs$count.y[is.na(mergedTermFreqs$count.y)] = 0
+    
+    mergedTermFreqs <- as.data.frame(mergedTermFreqs)
+    mergedTermFreqs$count <- mergedTermFreqs$count.x +
+                             mergedTermFreqs$count.y
+    mergedTermFreqs <- data.table(mergedTermFreqs[,c("count","unigram")])
+    setkey(mergedTermFreqs,unigram)    
+}
+
 analyzeUnigramStatistics <- function(textFileDirectory,
                                      textDataFile,
                                      num_lines,
@@ -45,7 +69,7 @@ analyzeUnigramStatistics <- function(textFileDirectory,
     #              located in textFileDirectory
     #
     #   blackList: Character vector that stores a list of words to 
-    #              exclude from from a line corpus
+    #              exclude from a line corpus
     #
     #   chunkSparsity: Optional floating point input that defines 
     #                  the removeSparseTerms() sparse input
@@ -127,14 +151,9 @@ analyzeUnigramStatistics <- function(textFileDirectory,
                     termFreqs <- curChunkTermFreqs
                     firstChunk <- FALSE
                 }else {
-                    termFreqs <- merge(termFreqs, curChunkTermFreqs, all=TRUE)
-                    termFreqs$count.x[is.na(termFreqs$count.x)] = 0
-                    termFreqs$count.y[is.na(termFreqs$count.y)] = 0
-                    
-                    termFreqs <- as.data.frame(termFreqs)
-                    termFreqs$count <- termFreqs$count.x + termFreqs$count.y
-                    termFreqs <- data.table(termFreqs[,c("count","unigram")])
-                    setkey(termFreqs,unigram)
+                    termFreqs <- 
+                        mergeTermFrequencyDataTables(termFreqs,
+                                                     curChunkTermFreqs)
                 }
                 
                 rm(cur_chunk)
@@ -175,7 +194,7 @@ analyzeTextDataUnigramStatistics <- function(textFileDirectory,
     #              located in textFileDirectory
     #
     #   blackList: Character vector that stores a list of words to 
-    #              exclude from from a line corpus
+    #              exclude from a line corpus
     #
     #   chunkSparsity: Optional floating point input that defines 
     #                  the removeSparseTerms() sparse input
@@ -205,4 +224,70 @@ analyzeTextDataUnigramStatistics <- function(textFileDirectory,
                                      numberCores)
         }
     }    
+}
+
+findCommonTerms <- function(outputTextFileDirectory,
+                            cdfThreshold) {
+    #-----------------------------------------------------------------
+    # Initializes a list of common terms based on term frequencies
+    # estimated from a set of text files
+    #
+    # Args:
+    #   outputTextFileDirectory: String that stores the full path
+    #                            to a directory that stores RData
+    #                            file(s) that contain term frequencies
+    #
+    #   cdfThreshold: Term frequency Cumulative Distribution Function
+    #                 (CDF) that controls the select of common terms.
+    #
+    #                 KEY POINT: The term frequency CDF may not sum
+    #                            to 1 depending on the chunk sparsity
+    #                            input to the R script that computes
+    #                            term frequencies
+    #
+    # Returns:
+    #   None - Writes the common terms to an RData file (i.e. 
+    #          "commonTerms.RData") in outputTextFileDirectory
+    #-----------------------------------------------------------------
+    combinedTermFreqsDT <- data.table()
+    combined_word_count <- 0
+    
+    termsRDataFilePattern <- paste0(basename(outputTextFileDirectory),
+                                    ".*Terms.RData")
+    
+    for (curTermFreqsFile in dir(outputTextFileDirectory,
+                                 pattern=termsRDataFilePattern)) {
+        load(file.path(outputTextFileDirectory, curTermFreqsFile))
+        
+        combined_word_count <- combined_word_count + word_count
+        
+        print(sprintf("# of rows: %d in %s", nrow(termFreqs),
+                      curTermFreqsFile))
+        
+        if (nrow(combinedTermFreqsDT) == 0) {
+            combinedTermFreqsDT <- termFreqs
+        }else {
+            combinedTermFreqsDT <- 
+                mergeTermFrequencyDataTables(combinedTermFreqsDT,
+                                             termFreqs)
+        }
+    }
+    
+    combinedTermFreqs <- combinedTermFreqsDT$count
+    
+    names(combinedTermFreqs) <- combinedTermFreqsDT$unigram
+    
+    combinedTermFreqs <- sort(combinedTermFreqs / combined_word_count,
+                              decreasing=TRUE)
+    
+    combinedTermFreqs <- cumsum(combinedTermFreqs)
+    cutoff_idx <- which(combinedTermFreqs >= cdfThreshold)[1]
+    
+    commonTerms <- names(combinedTermFreqs[1:cutoff_idx])
+    
+    printf("CDF threshold: %f # of terms: %d", cdfThreshold,
+                                               length(commonTerms))
+    
+    save(file=file.path(outputTextFileDirectory,"commonTerms.RData"),
+         commonTerms)    
 }

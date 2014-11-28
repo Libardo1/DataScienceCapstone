@@ -53,6 +53,8 @@ analyzeTextDataUnigramStatistics(outputTextFileDirectory,
 ```
 
 ```{r constructTransitionMatrix}
-load("./OutputData//en_US/en_US.blogs_TrainingDataTerms.RData")
+outputTextFileDirectory <- "./OutputData//en_US/"
+
+findCommonTerms(outputTextFileDirectory, 0.68)
 ```
 
