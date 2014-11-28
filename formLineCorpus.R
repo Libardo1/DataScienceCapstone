@@ -133,7 +133,8 @@ readBlackList <- function(blackListFile) {
 }
 
 processDocumentChunk <- function(cur_chunk,
-                                 blackList) {
+                                 blackList,
+                                 numberCores=1) {
     #--------------------------------------------------------------------------
     # This function applies the following set of transformations to a set of 
     # text file lines:
@@ -149,6 +150,8 @@ processDocumentChunk <- function(cur_chunk,
     #   blackList: Character vector that stores a list of words to exclude from
     #              from a line corpus
     #
+    #   numberCores: Optional input that specifies the number of cores
+    #
     # Returns:
     #   curChunkCorpus: tm R package Corpus object that contains a corpus for
     #                   a set of text file lines
@@ -157,19 +160,19 @@ processDocumentChunk <- function(cur_chunk,
     
     curChunkCorpus <- tm_map(curChunkCorpus,
                              removeNonASCII,
-                             mc.cores=1)
+                             mc.cores=numberCores)
 
     curChunkCorpus <- tm_map(curChunkCorpus,
                              customRemovePunctuation,
-                             mc.cores=1)
+                             mc.cores=numberCores)
 
     curChunkCorpus <- tm_map(curChunkCorpus,
                              removeNumbers,
-                             mc.cores=1)
+                             mc.cores=numberCores)
     
     curChunkCorpus <- tm_map(curChunkCorpus,
                              stripWhitespace,
-                             mc.cores=1)
+                             mc.cores=numberCores)
     
     curChunkCorpus <- tm_map(curChunkCorpus,
                              removeWords,

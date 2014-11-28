@@ -162,13 +162,16 @@ sampleTextFile <- function(inputTextFilePath,
 }
 
 splitTextData <- function(inputTextFilePath,
+                          outputTextFileDirectory,
                           num_lines) {
     #--------------------------------------------------------------------
     # Splits a text data file into training, testing, & validation 
-    # data sets
+    # data sets (using a 60%/20%/20% split)
     #
     # Args:
     #   inTextFilePath: Full path to the input text file
+    #
+    #   outputTextFileDirectory: Full path to output text file directory 
     #
     #   num_lines: List that stores the number of lines of each text file
     #              contained in a directory
@@ -238,6 +241,35 @@ splitTextData <- function(inputTextFilePath,
     close(h_trainingDataConn)
     close(h_testDataConn)
     close(h_validationDataConn)
+}
+
+splitTextDataFiles <- function(inputTextDataPath,
+                               outputTextFileDirectory,
+                               num_lines) {
+    #--------------------------------------------------------------------
+    # Splits a set of text data files into training, testing, & 
+    # validation data sets (using a 60%/20%/20% split)
+    #
+    # Args:
+    #   inputTextDataPath: Full path to a directory that stores text 
+    #   data files
+    #
+    #   outputTextFileDirectory: Full path to output text file directory 
+    #
+    #   num_lines: List that stores the number of lines of each text file
+    #              contained in a directory
+    #
+    # Returns:
+    #   None
+    #--------------------------------------------------------------------
+    for (curTextFile in dir(inputTextDataPath, pattern=".*txt$")) {
+        inputTextFilePath <- file.path(inputTextDataPath,
+                                       curTextFile)
+        
+        splitTextData(inputTextFilePath,
+                      outputTextFileDirectory,
+                      num_lines)
+    }
 }
 
 sampleTextFileUnitTest <- function(textFilePath,

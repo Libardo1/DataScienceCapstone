@@ -17,8 +17,130 @@ library(markovchain)
 
 source("./sampleTextFile.R")
 source("./formLineCorpus.R")
+source("./determineTextFileSize.R")
 
 blackList <- readBlackList("./Data/Terms-to-Block.csv")
+```
+
+```{r splitTextData}
+set.seed(18244)
+
+inputTextDataPath <- "./Data/final/en_US"
+outputTextFileDirectory <- "./OutputData//en_US/"
+load("./OutputData//en_US/en_USNumLines.RData")
+
+splitTextDataFiles(inputTextDataPath,
+                   outputTextFileDirectory,
+                   num_lines)
+
+determineSplitTextDataNumLines(outputTextFileDirectory)
+```
+
+```{r constructModelInputs}
+#http://stackoverflow.com/questions/24099098/language-detection-in-r-with-the-textcat-package-how-to-restrict-to-a-few-lang
+profileDb <- TC_byte_profiles[names(TC_byte_profiles) %in% 
+                              c("english",
+                                "french",
+                                "finnish",
+                                "russian-iso8859_5",
+                                "russian-koi8_r",
+                                "russian-windows1251")]
+
+computeTermFrequencies <- function(curTDM) {
+    curTermFreq <- sort(rowSums(as.matrix(curTDM)), decreasing=TRUE)
+
+    curTermFreq <- as.data.frame(curTermFreq)
+    curTermFreq$unigram <- rownames(curTermFreq)
+    rownames(curTermFreq) <- NULL
+    colnames(curTermFreq) <- c("count","unigram")
+    curTermFreq <- as.data.table(curTermFreq)
+    setkey(curTermFreq,unigram)
+    
+    return(curTermFreq)
+}
+
+outputTextFileDirectory <- "./OutputData//en_US/"
+
+load(file.path(outputTextFileDirectory,
+               "splitTextDataNumLines.RData"))
+
+chunkSparsity <- 0.999
+
+inputTextFilePath <- file.path(outputTextFileDirectory,
+                               "en_US.blogs_TrainingData.txt")
+
+total_num_lines <- num_lines[[basename(inputTextFilePath)]][1]
+num_lines_to_read <- ceiling(total_num_lines/100)
+textFileLanguage <- "english"
+
+firstChunk <- TRUE
+lines_read <- 0
+h_conn <- file(inputTextFilePath, "r", blocking=FALSE)
+
+repeat {
+    cur_chunk <- readLines(h_conn, num_lines_to_read, skipNul=TRUE)
+
+    if (length(cur_chunk) > 0) {
+        lines_read <- lines_read + length(cur_chunk)
+        
+        print("-------------------------------------------------------------")
+        print(sprintf("Lines read: %d (Out of %d)", lines_read,
+                                                    total_num_lines))
+
+        # http://stackoverflow.com/questions/9546109/how-to-remove-002-char-in-ruby
+        #
+        # http://stackoverflow.com/questions/11874234/difference-between-w-and-b-
+        #   regular-expression-meta-characters
+        cur_chunk <- gsub("\\W+"," ", cur_chunk)
+        
+        curChunkLanguage <- textcat(cur_chunk, p = profileDb)
+
+        validLanguageIdx <- 
+            which(grepl(paste0(textFileLanguage,"[a-z0-9_]*"),
+                               curChunkLanguage))
+            
+        cur_chunk <- cur_chunk[validLanguageIdx]
+        
+        if (length(cur_chunk) == 0) {
+            break
+        }
+        else {
+            curLineCorpus <- processDocumentChunk(cur_chunk,
+                                                  blackList,
+                                                  6)
+
+            curTDM <- removeSparseTerms(TermDocumentMatrix(curLineCorpus),
+                                        chunkSparsity)
+
+            curChunkTermFreqs <- computeTermFrequencies(curTDM)
+            
+            if (firstChunk == TRUE) {
+                termFreqs <- curChunkTermFreqs
+                firstChunk <- FALSE
+            }else {
+                termFreqs <- termFreqs[curChunkTermFreqs]
+                termFreqs <- as.data.frame(termFreqs)
+                
+                termFreqs$count[is.na(termFreqs$count)] = 0
+                termFreqs$count[is.na(termFreqs$i.count)] = 0
+                
+                termFreqs$count <- termFreqs$count + termFreqs$i.count
+                termFreqs <- data.table(termFreqs[,c("count","unigram")])
+                setkey(termFreqs,unigram)
+            }
+            
+            rm(cur_chunk)
+            rm(curLineCorpus)
+            rm(curTermFreqs)
+            
+            print(sprintf("Current number of terms: %d", nrow(termFreqs)))
+        }
+    }
+}
+close(h_conn)
+filePrefix <- unlist(str_split(basename(inputTextFilePath),"\\.txt"))[1]
+save(file=file.path(outputTextFileDirectory,paste0(filePrefix,
+                                                   "Terms.RData")),tdm)
 ```
 
 ```{r prototypeModelConstruction0}
@@ -39,8 +161,7 @@ curTrainingData <- cur_chunk[chunkSampling$train_data_idx]
 curTestData <- cur_chunk[chunkSampling$test_data_idx]
 curValidationData <- cur_chunk[chunkSampling$validation_data_idx]
 
-curLineCorpus <- processDocumentChunk(curTrainingData, blackList)
-tdm <- TermDocumentMatrix(curLineCorpus)
+
 
 tdm0 <- sort(rowSums(as.matrix(tdm)),decreasing=TRUE)
 normFactor <- sum(tdm0)
@@ -52,7 +173,7 @@ termPDF1 <- tdm1 / normFactor
 termCDF1 <- cumsum(termPDF1)
 length(termCDF1)
 
-chunkSparsity <- 0.999
+
 
 
 curLineCorpus0 <- processDocumentChunk(curTrainingData0, blackList)
@@ -75,13 +196,3 @@ length(termCDF3)
 close(h_conn)
 ```
 
-```{r splitTextData}
-set.seed(18244)
-outputTextFileDirectory <- "./OutputData//en_US/"
-load("./OutputData//en_US/en_USNumLines.RData")
-
-inputTextFilePath <- "./Data/final/en_US//en_US.blogs.txt"
-
-splitTextData(inputTextFilePath, num_lines)
-
-```

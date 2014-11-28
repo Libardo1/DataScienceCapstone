@@ -76,3 +76,54 @@ determineSampledTextFileSize <- function(outputTextFileDirectory,
     }
     return(outputFilePath)
 }
+
+determineSplitTextDataNumLines <- function(outputTextFileDirectory) {
+    #--------------------------------------------------------------------
+    # Determines the number of lines in a set of training, test, &
+    # validation text data files. The output of this R script is an
+    # RData file (i.e. "splitTextDataNumLines.RData") written to
+    # outputTextFileDirectory
+    #
+    # Args:
+    #   outputTextFileDirectory: Full path to a directory that contains
+    #                            a set of training, test, & validation
+    #                            text data files
+    #
+    # Returns:
+    #   None
+    #--------------------------------------------------------------------
+    outputFilePath <- file.path(outputTextFileDirectory,
+                                "splitTextDataNumLines.RData")
+    
+    if (!file.exists(outputFilePath)) {
+        splitTextDataFiles <- character()
+        
+        for(curTextFile in dir(outputTextFileDirectory,
+                               pattern="(.)*_TrainingData.txt")) {
+            splitTextDataFiles <- append(splitTextDataFiles, curTextFile)
+        }
+        
+        for(curTextFile in dir(outputTextFileDirectory,
+                               pattern="(.)*_TestData.txt")) {
+            splitTextDataFiles <- append(splitTextDataFiles, curTextFile)
+        }
+        
+        for(curTextFile in dir(outputTextFileDirectory,
+                               pattern="(.)*_ValidationData.txt")) {
+            splitTextDataFiles <- append(splitTextDataFiles, curTextFile)
+        }
+        
+        num_lines <- list()
+        for(curTextFile in splitTextDataFiles) {
+            # http://www.inside-r.org/packages/cran/R.utils/docs/countLines
+            h_conn <- file(file.path(outputTextFileDirectory,
+                                     curTextFile), "rb")
+
+            num_lines[[curTextFile]] <- countLines(h_conn)
+
+            close(h_conn)
+        }
+        
+        save(file=outputFilePath, num_lines)
+    }
+}
