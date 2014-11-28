@@ -75,6 +75,7 @@ textFileLanguage <- "english"
 
 firstChunk <- TRUE
 lines_read <- 0
+word_count <- 0
 h_conn <- file(inputTextFilePath, "r", blocking=FALSE)
 
 repeat {
@@ -109,8 +110,11 @@ repeat {
                                                   blackList,
                                                   6)
 
-            curTDM <- removeSparseTerms(TermDocumentMatrix(curLineCorpus),
-                                        chunkSparsity)
+            curTDM <- TermDocumentMatrix(curLineCorpus)
+            
+            word_count <- word_count + sum(rowSums(as.matrix(curTDM)))
+            
+            curTDM <- removeSparseTerms(curTDM, chunkSparsity)
 
             curChunkTermFreqs <- computeTermFrequencies(curTDM)
             
@@ -118,20 +122,19 @@ repeat {
                 termFreqs <- curChunkTermFreqs
                 firstChunk <- FALSE
             }else {
-                termFreqs <- termFreqs[curChunkTermFreqs]
+                termFreqs <- merge(termFreqs, curChunkTermFreqs, all=TRUE)
+                termFreqs$count.x[is.na(termFreqs$count.x)] = 0
+                termFreqs$count.y[is.na(termFreqs$count.y)] = 0
+
                 termFreqs <- as.data.frame(termFreqs)
-                
-                termFreqs$count[is.na(termFreqs$count)] = 0
-                termFreqs$count[is.na(termFreqs$i.count)] = 0
-                
-                termFreqs$count <- termFreqs$count + termFreqs$i.count
+                termFreqs$count <- termFreqs$count.x + termFreqs$count.y
                 termFreqs <- data.table(termFreqs[,c("count","unigram")])
                 setkey(termFreqs,unigram)
             }
             
             rm(cur_chunk)
             rm(curLineCorpus)
-            rm(curTermFreqs)
+            rm(curChunkTermFreqs)
             
             print(sprintf("Current number of terms: %d", nrow(termFreqs)))
         }
