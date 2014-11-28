@@ -23,38 +23,48 @@ source("./formLineCorpus.R")
 source("./determineTextFileSize.R")
 source("./analyzeUnigramStatistics.R")
 
-blackList <- readBlackList("./Data/Terms-to-Block.csv")
 ```
 
 ```{r splitTextData}
 set.seed(18244)
-
 inputTextDataPath <- "./Data/final/en_US"
 outputTextFileDirectory <- "./OutputData//en_US/"
-load("./OutputData//en_US/en_USNumLines.RData")
 
-splitTextDataFiles(inputTextDataPath,
-                   outputTextFileDirectory,
-                   num_lines)
+if (length(dir(outputTextFileDirectory, pattern="*TrainingData.txt")) == 0) {
+    load("./OutputData//en_US/en_USNumLines.RData")
 
-determineSplitTextDataNumLines(outputTextFileDirectory)
+    blackList <- readBlackList("./Data/Terms-to-Block.csv")
+    
+    splitTextDataFiles(inputTextDataPath,
+                       outputTextFileDirectory,
+                       num_lines)
+    
+    determineSplitTextDataNumLines(outputTextFileDirectory)    
+}
 ```
 
 ```{r analyzeUnigramStatistics}
 outputTextFileDirectory <- "./OutputData//en_US/"
 
-load(file.path(outputTextFileDirectory,
-               "splitTextDataNumLines.RData"))
-
-analyzeTextDataUnigramStatistics(outputTextFileDirectory,
-                                 ".*TrainingData.txt",
-                                 num_lines,
-                                 blackList)
+if (!file.exists(file.path(outputTextFileDirectory,"commonTerms.RData"))) {
+    load(file.path(outputTextFileDirectory,
+                   "splitTextDataNumLines.RData"))
+    
+    analyzeTextDataUnigramStatistics(outputTextFileDirectory,
+                                     ".*TrainingData.txt",
+                                     num_lines,
+                                     blackList)
+    
+    findCommonTerms(outputTextFileDirectory, 0.68)    
+}
 ```
 
 ```{r constructTransitionMatrix}
-outputTextFileDirectory <- "./OutputData//en_US/"
+load(file.path(outputTextFileDirectory,"commonTerms.RData"))
 
-findCommonTerms(outputTextFileDirectory, 0.68)
+load(file.path(outputTextFileDirectory,
+                   "splitTextDataNumLines.RData"))
+
+blackList <- readBlackList("./Data/Terms-to-Block.csv")
 ```
 
