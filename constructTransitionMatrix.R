@@ -175,7 +175,6 @@ initializeTrigramCounts <- function(textFileDirectory,
                                                             commonTerms)
                 
                 commonTriTdm <- tdmTri[commonIdx]
-                print(sprintf("Trigram: %s", names(commonTriTdm)[1]))
                 
                 for (m in seq_len(length(commonTriTdm))) {                    
                     curWords <- unlist(str_split(names(commonTriTdm[m])," "))
