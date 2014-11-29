@@ -22,7 +22,6 @@ source("./sampleTextFile.R")
 source("./formLineCorpus.R")
 source("./determineTextFileSize.R")
 source("./analyzeUnigramStatistics.R")
-
 ```
 
 ```{r splitTextData}
@@ -60,11 +59,25 @@ if (!file.exists(file.path(outputTextFileDirectory,"commonTerms.RData"))) {
 ```
 
 ```{r constructTransitionMatrix}
+source("./constructTransitionMatrix.R")
+
+outputTextFileDirectory <- "./OutputData//en_US/"
+
 load(file.path(outputTextFileDirectory,"commonTerms.RData"))
 
 load(file.path(outputTextFileDirectory,
                    "splitTextDataNumLines.RData"))
 
 blackList <- readBlackList("./Data/Terms-to-Block.csv")
+
+constructTransitionMatrix(outputTextFileDirectory,
+                          num_lines,
+                          commonTerms,
+                          blackList)
+
+load("./transitionMatrix.RData")
+textPredictor <- new("markovchain",
+                     transitionMatrix=transitionMatrix)
+rm(transitionMatrix)
 ```
 
