@@ -77,7 +77,7 @@ initializeTrigramCounts <- function(textFileDirectory,
                                     commonTerms,
                                     blackList,
                                     textFileLanguage = "english",
-                                    numberCores = 6) {
+                                    numberCores = 1) {
     #-----------------------------------------------------------------
     # Initializes triagram counts in a Markov chain transition matrix
     #
@@ -121,7 +121,7 @@ initializeTrigramCounts <- function(textFileDirectory,
     inputTextFilePath <- file.path(textFileDirectory, textDataFile)
     
     total_num_lines <- num_lines[[textDataFile]][1]
-    num_lines_to_read <- 100
+    num_lines_to_read <- 2500
 
     lines_read <- 0
     word_count <- 0
@@ -137,6 +137,11 @@ initializeTrigramCounts <- function(textFileDirectory,
                               nrow=vocabularySize,
                               dimnames=list(commonTerms,
                                             commonTerms))
+    
+    transitionMatrixPath <- 
+        file.path(dirname(inputTextFilePath),
+                  paste0(unlist(str_split(textDataFile,"\\.txt"))[1],
+                         "_TransitionMatrix.RData"))
     
     repeat {
         cur_chunk <- readLines(h_conn, num_lines_to_read, skipNul=TRUE)
@@ -190,6 +195,8 @@ initializeTrigramCounts <- function(textFileDirectory,
                     }
                 }
                 
+                save(file=transitionMatrixPath, transitionMatrix)
+
                 rm(cur_chunk)
                 rm(tdmTri)
                 rm(commonTriTdm)
@@ -251,7 +258,6 @@ constructTransitionMatrix <- function(textFileDirectory,
             transitionMatrix <- transitionMatrix + curTransitionMatrix
         }
     }
-    save(file="./transitionMatrix0.RData", transitionMatrix)
     
     minProbability <- 0.01/(length(commonTerms)-1)
     

@@ -8,6 +8,9 @@ output: html_document
 based on triagram statistics
 
 ```{r setupEnvironment}
+# http://stackoverflow.com/questions/13090838/r-markdown-avoiding-package-loading-messages
+Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre1.8.0_20')
+
 library(rJava)
 library(RWeka)
 library(R.utils)
