@@ -131,22 +131,22 @@ shinyServer(function(input, output) {
     
     # http://stackoverflow.com/questions/22251956/
     # r-shiny-how-to-output-a-good-looking-matrix-using-rendertable
-    output$suggestedTerms = renderTable({
+    output$predictedNextWord = renderText({
         #http://r.789695.n4.nabble.com/length-of-empty-string-td4083712.html        
         currentPhrase <- preprocessTextInput(input$currentPhrase,
                                              blackList)
         
         if (length(currentPhrase) > 0) {
             textPrediction <- predictNextWord(currentPhrase,
-                                              input$numberOfTerms,
+                                              1,
                                               textPredictor)
             
-            suggestedTerms <- 
+            predictedNextWord <- 
                 t(as.matrix(textPrediction$conditionalProbability))
             
-            rownames(suggestedTerms) <- "P(term)"
-            
-            return(suggestedTerms)
+            rownames(predictedNextWord) <- "P(term)"
+
+            return(colnames(predictedNextWord)[1])
         }
     })
 })
