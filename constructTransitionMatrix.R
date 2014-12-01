@@ -1,3 +1,9 @@
+# http://stackoverflow.com/questions/17703553/bigrams-instead-of-single-words-
+#   in-termdocument-matrix-using-r-and-rweka)
+BigramTokenizer <- function(x) {
+    RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 2, max = 2))
+}
+
 # http://stackoverflow.com/questions/19615181/finding-ngrams-in-r-and-
 #   comparing-ngrams-across-corpora
 TrigramTokenizer <- function(x) {
@@ -26,7 +32,7 @@ tokenizeTrigrams <- function(cur_chunk,
     curLineCorpus <- processDocumentChunk(cur_chunk,
                                           blackList,
                                           numberCores)
-
+    
     #http://stackoverflow.com/questions/17703553/bigrams-instead-of-single-words-
     #   in-termdocument-matrix-using-r-and-rweka
     options(mc.cores=1)
@@ -38,6 +44,42 @@ tokenizeTrigrams <- function(cur_chunk,
     tdmTri <- rowSums(as.matrix(tdmTri))
     
     return(tdmTri)
+}
+
+tokenizeBigrams <- function(cur_chunk,
+                            blackList,
+                            numberCores) {
+    #-----------------------------------------------------------------
+    # Initializes a named numeric vector that stores bigram counts
+    #
+    # Args:
+    #   cur_chunk: Character vector that stores a subset of a text 
+    #              file
+    #
+    #   blackList: Character vector that stores a list of words to 
+    #              exclude from a line corpus
+    #
+    #   numberCores: Optional input that defines the number of cores
+    #                to use when performing tm_map operations
+    #
+    # Returns:
+    #   tdmBi: Named numeric vector that stores bigram counts
+    #-----------------------------------------------------------------
+    curLineCorpus <- processDocumentChunk(cur_chunk,
+                                          blackList,
+                                          numberCores)
+
+    #http://stackoverflow.com/questions/17703553/bigrams-instead-of-single-words-
+    #   in-termdocument-matrix-using-r-and-rweka
+    options(mc.cores=1)
+    tdmBi <- 
+        as.matrix(TermDocumentMatrix(curLineCorpus,
+                                     control =
+                                         list(tokenize = BigramTokenizer)))
+    
+    tdmBi <- rowSums(as.matrix(tdmBi))
+    
+    return(tdmBi)
 }
 
 initializeCommonTrigramIndices <- function(curTriTdm,
@@ -277,4 +319,3 @@ constructTransitionMatrix <- function(textFileDirectory,
     }
     save(file="./transitionMatrix.RData", transitionMatrix)
 }
-

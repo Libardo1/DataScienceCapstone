@@ -1,0 +1,117 @@
+---
+title: "EvaluateTextPredictor"
+author: "mspcvsp"
+date: "Sunday, November 30, 2014"
+output: html_document
+---
+
+```{r setupEnvironment}
+# http://stackoverflow.com/questions/13090838/r-markdown-avoiding-package-loading-messages
+Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre1.8.0_20')
+
+library(rJava)
+library(RWeka)
+library(R.utils)
+library(stringi)
+library(stringr)
+library(shiny)
+library(textcat)
+library(tm)
+library(markovchain)
+
+source("./formLineCorpus.R")
+source("./constructTransitionMatrix.R")
+source("./shinyApplication//predictNextWord.R")
+```
+
+
+```{r evaluateTextPredictor}
+blackList <- readBlackList("./Data/Terms-to-Block.csv")
+
+profileDb <- TC_byte_profiles[names(TC_byte_profiles) %in% 
+                                  c("english",
+                                    "french",
+                                    "finnish",
+                                    "russian-iso8859_5",
+                                    "russian-koi8_r",
+                                    "russian-windows1251")]
+
+textFileDirectory <- "./OutputData//en_US/"
+load("./OutputData//en_US/commonTerms.RData")
+load(file.path(outputTextFileDirectory, "splitTextDataNumLines.RData"))
+
+
+testDataFiles <- dir(textFileDirectory, pattern="*TestData.txt")
+textDataFile <- testDataFiles[1]
+
+inputTextFilePath <- file.path(textFileDirectory, textDataFile)
+
+total_num_lines <- num_lines[[textDataFile]][1]
+num_lines_to_read <- 25
+
+h_conn <- file(inputTextFilePath, "r", blocking=FALSE)
+
+cur_chunk <- readLines(h_conn, num_lines_to_read, skipNul=TRUE)
+close(h_conn)
+
+textFileLanguage <- "english"
+
+cur_chunk <- gsub("\\W+"," ", cur_chunk)
+
+curChunkLanguage <- textcat(cur_chunk, p = profileDb)
+
+validLanguageIdx <- 
+    which(grepl(paste0(textFileLanguage,"[a-z0-9_]*"),
+                curChunkLanguage))
+
+cur_chunk <- cur_chunk[validLanguageIdx]
+
+tdmTri <- tokenizeTrigrams(cur_chunk,blackList,1)
+trigrams <- names(tdmTri)
+
+tdmBi <- tokenizeBigrams(cur_chunk,blackList,1)
+bigrams <- names(tdmBi)
+
+bigramInVocabulary <- logical(length(bigrams))
+trigramInVocabulary <- logical(length(trigrams))
+
+for (n in seq_len(length(bigrams))) {
+    if (sum(unlist(str_split(bigrams[n],"\\s+")) %in% commonTerms) == 2) {
+        bigramInVocabulary[n] <- TRUE
+    }
+}
+
+for (n in seq_len(length(trigrams))) {
+    if (sum(unlist(str_split(trigrams[n],"\\s+")) %in% commonTerms) == 3) {
+        trigramInVocabulary[n] <- TRUE
+    }
+}
+
+trigrams <- trigrams[trigramInVocabulary]
+
+load("./transitionMatrix.RData")
+textPredictor <- new("markovchain",
+                     transitionMatrix=transitionMatrix)
+
+correctWord <- logical(length(trigrams))
+
+vocabulary <- rownames(transitionMatrix)
+
+
+
+for (n in seq_len(length(trigrams))) {
+    curWords <- unlist(str_split(trigrams[n],"\\s+"))
+    
+    textPrediction <- predictNextWord(curWords[1:2],
+                                      3,
+                                      textPredictor)
+    
+    correctWord[n] <- 
+        curWords[3] %in% names(textPrediction$conditionalProbability)
+    
+    rowIdx <- which(curWords[2] == vocabulary)
+    sortedProbabilities <- sort(transitionMatrix[rowIdx,], decreasing=TRUE)
+    idx <- which(names(sortedProbabilities) == curWords[3])
+}
+
+```
