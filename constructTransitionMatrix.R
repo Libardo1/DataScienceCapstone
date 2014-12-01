@@ -233,7 +233,8 @@ initializeTrigramCounts <- function(textFileDirectory,
                         colIdx <- which(grepl(paste0("^",curWords[n],"$"),
                                               commonTerms))
 
-                        transitionMatrix[rowIdx,colIdx] <- commonTriTdm[m]
+                        transitionMatrix[rowIdx,colIdx] <- 
+                            transitionMatrix[rowIdx,colIdx] + commonTriTdm[m]
                     }
                 }
                 
