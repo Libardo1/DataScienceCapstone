@@ -1,3 +1,17 @@
+# http://stackoverflow.com/questions/9934856/removing-non-ascii-characters-from-data-files
+# http://stackoverflow.com/questions/18153504/removing-non-english-text-from-corpus-in-r-using-tm
+removeNonASCII <-
+    content_transformer(function(x) iconv(x, "latin1", "ASCII", sub=""))
+
+# http://stackoverflow.com/questions/14281282/
+# how-to-write-custom-removepunctuation-function-to-better-deal-with-unicode-cha
+#
+# http://stackoverflow.com/questions/8697079/remove-all-punctuation-except-apostrophes-in-r
+customRemovePunctuation <- content_transformer(function(x) {
+    x <- gsub("[[:punct:]]"," ",tolower(x))
+    return(x)
+})
+
 predictNextWord <- function(curPhrase,
                             numberOfTerms,
                             textPredictor) {
@@ -61,4 +75,56 @@ predictNextWord <- function(curPhrase,
              decreasing=TRUE)[1:numberOfTerms]
     
     return(textPrediction)
+}
+
+preprocessTextInput <- function(textInput,
+                                blackList) {
+    #--------------------------------------------------------------------------
+    # Applies the following transformations to a text input:
+    # 1.) Remove non-ASCII characters
+    # 2.) Remove punctuation
+    # 3.) Remove numbers
+    # 4.) Remove whitespace
+    # 5.) Remove profane words contained in a "blacklist"
+    # 6.) Splits the text input into a words
+    # 7.) Removes blank words
+    #
+    # Args:
+    #   textInput: String that stores a text input
+    #
+    #   blackList: Character vector that contains profane words to remove
+    #
+    # Returns:
+    #   predictorInput: Character vector that contains pre-processed text 
+    #                   phrase words
+    #--------------------------------------------------------------------------
+    textInputCorpus <- Corpus(VectorSource(textInput))
+    
+    textInputCorpus <- tm_map(textInputCorpus,
+                              removeNonASCII,
+                              mc.cores=1)
+    
+    textInputCorpus <- tm_map(textInputCorpus,
+                              customRemovePunctuation,
+                              mc.cores=1)
+    
+    textInputCorpus <- tm_map(textInputCorpus,
+                              removeNumbers,
+                              mc.cores=1)
+    
+    textInputCorpus <- tm_map(textInputCorpus,
+                              stripWhitespace,
+                              mc.cores=1)
+    
+    textInputCorpus <- tm_map(textInputCorpus,
+                              removeWords,
+                              blackList,
+                              mc.cores=1)
+    
+    predictorInput <- 
+        unlist(str_split(as.character(textInputCorpus[[1]])," "))
+    
+    predictorInput <- predictorInput[predictorInput != ""]
+    
+    return(predictorInput)
 }

@@ -1,3 +1,5 @@
+source("./formLineCorpus.R")
+
 # http://stackoverflow.com/questions/17703553/bigrams-instead-of-single-words-
 #   in-termdocument-matrix-using-r-and-rweka)
 BigramTokenizer <- function(x) {
@@ -319,4 +321,134 @@ constructTransitionMatrix <- function(textFileDirectory,
         }
     }
     save(file="./transitionMatrix.RData", transitionMatrix)
+}
+
+loadVocabularyCounts <- function(textFileDirectory) {
+    #-----------------------------------------------------------------
+    # Loads un-normalized transition matricies (i.e. vocabulary word
+    # counts)
+    #
+    # Args:
+    #   textFileDirectory: String that defines the directory that contains
+    #                      un-normalized transition matricies for the
+    #                      english language training data
+    #
+    # Returns:
+    #   vocabularyCounts: List that contains the vocabulary counts for
+    #                     the english language training data
+    #-----------------------------------------------------------------
+    vocabularyCounts <- list()
+    
+    load(file.path(textFileDirectory,
+                   "en_US.blogs_TrainingData_TransitionMatrix.RData"))
+    vocabularyCounts[["blogs"]] <- transitionMatrix
+         
+    load(file.path(textFileDirectory,
+                   "en_US.twitter_TrainingData_TransitionMatrix.RData"))
+    vocabularyCounts[["twitter"]] <- transitionMatrix
+    
+    load(file.path(textFileDirectory,
+                   "en_US.news_TrainingData_TransitionMatrix.RData"))
+    vocabularyCounts[["news"]] <- transitionMatrix
+    
+    return(vocabularyCounts)
+}
+
+initializeVocabularyDistribution <- function(vocabularyCounts) {
+    #------------------------------------------------------------------------
+    # Initializes a data frame that describes the distribution of
+    # vocabulary words across the english language training data
+    #
+    # Args:
+    #   vocabularyCounts: List that contains the vocabulary counts for
+    #                     the english language training data
+    #
+    # Returns:
+    #   vocabularyDistribution: Data frame that describes the 
+    #                           distribution of vocabulary words across 
+    #                           the english language training data
+    #------------------------------------------------------------------------    
+    blogs <- data.frame(counts=rowSums(vocabularyCounts[["blogs"]]))
+    blogs$type <- "blogs"
+    blogs$vocabularyindex <- seq(1,nrow(blogs))
+    rownames(blogs) <- NULL
+    
+    twitter <- data.frame(counts=rowSums(vocabularyCounts[["twitter"]]))
+    twitter$type <- "twitter"
+    twitter$vocabularyindex <- seq(1,nrow(twitter))
+    rownames(twitter) <- NULL
+    
+    news <- data.frame(counts=rowSums(vocabularyCounts[["news"]]))
+    news$type <- "news"
+    news$vocabularyindex <- seq(1,nrow(news))
+    rownames(news) <- NULL
+    
+    vocabularyDistribution <- rbind(rbind(blogs, twitter), news)
+    
+    vocabularyDistribution$counts <- 
+        vocabularyDistribution$counts / ncol(vocabularyCounts[["blogs"]])
+    
+    return(vocabularyDistribution)
+}
+
+constructAverageTransitionMatrix <- function(vocabularyCounts) {
+    #------------------------------------------------------------------------
+    # Constructs an average normalized transition matrix based on the
+    # vocabulary counts for the enligsh language training data
+    #
+    # Args:
+    #   vocabularyCounts: List that contains the vocabulary counts for
+    #                     the english language training data
+    #
+    # Returns:
+    #   averageTranstionMatrix: List that contains the following data:
+    #       - transitionData: An average normalized transition matrix based on 
+    #                         the vocabulary counts for the enligsh language 
+    #                         training data
+    #
+    #       - zeroCount: Number of columns in each transition matrix row where
+    #                    the frequency of occurence in the training data was 
+    #                     zero
+    #------------------------------------------------------------------------
+    transitionMatrix <- (vocabularyCounts[["blogs"]] + 
+                         vocabularyCounts[["twitter"]] + 
+                         vocabularyCounts[["news"]]) / 3.0
+    
+
+    zeroCount <- vector('numeric',ncol(transitionMatrix))
+    for (n in seq_len(length(zeroCount))) {
+        zeroColIdx <- which(transitionMatrix[n,] == 0)
+        zeroCount[n] <- length(zeroColIdx)
+        
+        if (zeroCount[n] != ncol(transitionMatrix)) {
+            transitionMatrix[n,] <- 
+                transitionMatrix[n,] / sum(transitionMatrix[n,])
+            
+            if (zeroCount[n] > 0) {
+                nonZeroColIdx <- which(transitionMatrix[n,] > 0)
+                
+                minProbability = (1 - length(nonZeroColIdx) / 
+                                 ncol(transitionMatrix))/zeroCount[n]
+                
+                nonZeroColIdx <- which(transitionMatrix[n,] > minProbability)
+                
+                probabilityAdjustment <- 
+                    (minProbability*zeroCount[n])/length(nonZeroColIdx)
+                
+                transitionMatrix[n,nonZeroColIdx] <- 
+                    transitionMatrix[n,nonZeroColIdx] - probabilityAdjustment
+                
+                transitionMatrix[n,zeroColIdx] <- minProbability
+            }    
+        }
+        else {
+            transitionMatrix[n,] <- 1.0/ncol(transitionMatrix)
+        }    
+    }
+    
+    averageTranstionMatrix <- list()
+    averageTranstionMatrix[["zeroCount"]] <- zeroCount
+    averageTranstionMatrix[["transitionMatrix"]] <- transitionMatrix
+    
+    return(averageTranstionMatrix)
 }

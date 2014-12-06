@@ -277,17 +277,21 @@ findCommonTerms <- function(outputTextFileDirectory,
     
     names(combinedTermFreqs) <- combinedTermFreqsDT$unigram
     
-    combinedTermFreqs <- sort(combinedTermFreqs / combined_word_count,
-                              decreasing=TRUE)
+    combinedTermPDF <- sort(combinedTermFreqs / combined_word_count,
+                            decreasing=TRUE)
     
-    combinedTermFreqs <- cumsum(combinedTermFreqs)
-    cutoff_idx <- which(combinedTermFreqs >= cdfThreshold)[1]
+    combinedTermCDF <- cumsum(combinedTermPDF)
+    cutoff_idx <- which(combinedTermCDF >= cdfThreshold)[1]
     
-    commonTerms <- names(combinedTermFreqs[1:cutoff_idx])
+    commonTerms <- names(combinedTermCDF[1:cutoff_idx])
     
     printf("CDF threshold: %f # of terms: %d", cdfThreshold,
                                                length(commonTerms))
     
+    combinedTermPDF <- combinedTermPDF[1:cutoff_idx]
+    combinedTermPDF <- combinedTermPDF / sum(combinedTermPDF)
+    
     save(file=file.path(outputTextFileDirectory,"commonTerms.RData"),
-         commonTerms)    
+         commonTerms,
+         combinedTermPDF)    
 }

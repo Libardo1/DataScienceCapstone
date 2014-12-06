@@ -20,6 +20,8 @@ library(shiny)
 library(textcat)
 library(tm)
 library(markovchain)
+library(ggplot2)
+library(RColorBrewer)
 
 source("./sampleTextFile.R")
 source("./formLineCorpus.R")
@@ -57,7 +59,7 @@ if (!file.exists(file.path(outputTextFileDirectory,"commonTerms.RData"))) {
                                      num_lines,
                                      blackList)
     
-    findCommonTerms(outputTextFileDirectory, 0.68)    
+    findCommonTerms(outputTextFileDirectory, 0.68)
 }
 ```
 
@@ -77,10 +79,55 @@ constructTransitionMatrix(outputTextFileDirectory,
                           num_lines,
                           commonTerms,
                           blackList)
-
-load("./transitionMatrix.RData")
-textPredictor <- new("markovchain",
-                     transitionMatrix=transitionMatrix)
-rm(transitionMatrix)
 ```
 
+```{r analyzeTransitionMatrix}
+vocabularyCounts <- loadVocabularyCounts("./OutputData//en_US")
+
+vocabularyDistribution <- initializeVocabularyDistribution(vocabularyCounts)
+
+ggplot(vocabularyDistribution,
+       aes(x=vocabularyindex,
+           y=counts,
+           colour=type,
+           fill=type)) + geom_point(size=2) + facet_wrap(~type) + 
+    scale_color_brewer(palette="Dark2") + scale_fill_brewer(palette="Dark2") + 
+    theme_gray(base_size = 14) + xlab("Vocabulary Index") + 
+    ylab("Counts / Vocabulary Size")
+
+averageTranstionMatrix <- constructAverageTransitionMatrix(vocabularyCounts)
+
+textPredictor <- 
+    new("markovchain",
+        transitionMatrix=averageTranstionMatrix[["transitionMatrix"]])
+
+save(file="./analyzeTransitionMatrix.RData", textPredictor,
+                                             averageTranstionMatrix)
+```
+
+```{r }
+source("./evaluateTextPredictorPerformance.R")
+load(file="./analyzeTransitionMatrix.RData")
+
+transitionMatrix <- averageTranstionMatrix[["transitionMatrix"]]
+save(file="./shinyApplication//transitionMatrix.RData", transitionMatrix)
+
+predictorEvalParams <- list()
+predictorEvalParams[["textPredictor"]] <- textPredictor
+rm(textPredictor)
+rm(averageTranstionMatrix)
+
+predictorEvalParams[["textFileDirectory"]] <- "./OutputData//en_US/"
+
+load(file.path(predictorEvalParams[["textFileDirectory"]],
+               "splitTextDataNumLines.RData"))
+
+predictorEvalParams[["num_lines"]] <- num_lines
+rm(num_lines)
+
+predictorEvalParams[["blackList"]] <- 
+    readBlackList("./Data/Terms-to-Block.csv")
+
+testDataEval <- evaluateTextPredictorPerformance(predictorEvalParams,
+                                                 "*TestData.txt")
+```
