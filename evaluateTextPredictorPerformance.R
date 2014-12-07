@@ -75,9 +75,9 @@ applyPredictorToTextFile <- function(predictorEvalParams,
             # http://stackoverflow.com/questions/11874234/difference-between-w-
             #   and-b-regular-expression-meta-characters
             cur_chunk <- gsub("\\W+"," ", cur_chunk)
-            
-            curChunkLanguage <- textcat(cur_chunk, p = profileDb)
-            
+                
+            curChunkLanguage <- textcat(cur_chunk, p = profileDb)   
+                
             validLanguageIdx <- 
                 which(grepl(paste0(textFileLanguage,"[a-z0-9_]*"),
                             curChunkLanguage))
@@ -95,7 +95,7 @@ applyPredictorToTextFile <- function(predictorEvalParams,
                 textFileEval[["trigramCount"]] <-
                     textFileEval[["trigramCount"]] + 
                     curChunkEval[["trigramCount"]]
-                
+                    
                 textFileEval[["commonTrigramCount"]] <-
                     textFileEval[["commonTrigramCount"]] + 
                     curChunkEval[["commonTrigramCount"]]
@@ -103,15 +103,21 @@ applyPredictorToTextFile <- function(predictorEvalParams,
                 textFileEval[["numCorrectPredictions"]] <-
                     textFileEval[["numCorrectPredictions"]] + 
                     curChunkEval[["numCorrectPredictions"]]
-                
+                    
                 textFileEval[["incorrectPredictions"]] <-
                     append(textFileEval[["incorrectPredictions"]],
                            curChunkEval[["incorrectPredictions"]])
             }
+        } else {
+            break
         }
-        break
     }
     close(h_conn)
+    
+    prefix <- unlist(str_split(textDataFile,"\\.txt"))[1]
+
+    save(file=file.path(predictorEvalParams[["textFileDirectory"]],
+                        paste0(prefix,"Eval.RData")), textFileEval)
     
     return(textFileEval)
 }
