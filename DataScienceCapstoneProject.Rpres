@@ -1,0 +1,39 @@
+JHU Data Science Specialization Capstone Project
+========================================================
+author: datasciencespm
+date: December 14, 2014
+transition: rotate
+font-family: 'Helvetica'
+
+Project Summary
+========================================================
+
+- Problem statement
+    - Implement a [Shiny application](http://shiny.rstudio.com/) 
+    that predicts the next word based on a phrase entered by a user
+- Challenges
+    - Frequency of word occurence in text follows a [power law](http://nlp.stanford.edu/IR-book/html/htmledition/zipfs-law-modeling-the-distribution-of-terms-1.html) relationship
+        - [~7K vocabulary](http://rpubs.com/mspcvsp/capstoneProjectEDA) is 
+        required to model 90% of unique words contained in 1% of project text 
+        data
+    - [Limited memory](https://groups.google.com/forum/#!msg/shiny-discuss/IFpkIuPTVRU/P3D4AuNRkUAJ) available for a deployed Shiny application
+- Solution
+    - Implement Markov chain prediction algorithm based on a vocabulary that models
+    68% of unique words in a 60% training data set
+
+Predictor User Interface
+========================================================
+
+![Shiny Application User Interface](./figures/userInterface.png)
+
+- Text Predictor User Interface:
+    - Step #1: Launch application by navigating to the [Shiny application URL](http://datasciencespm.shinyapps.io/EnglishLanguageTextPredictor)  
+    - Step #2: Enter a text phrase into the text input box
+    - Step #3: Press the "Predict Word Button"
+
+
+Predictor Performance Analysis
+========================================================
+
+Project Conclusion
+========================================================
