@@ -18,15 +18,15 @@ Project Summary
         data
     - [Limited memory](https://groups.google.com/forum/#!msg/shiny-discuss/IFpkIuPTVRU/P3D4AuNRkUAJ) available for a deployed Shiny application
 - Solution
-    - Implement Markov chain prediction algorithm based on a vocabulary that models
-    68% of unique words in a 60% training data set
+    - Implement [Markov chain](http://www.cs.princeton.edu/courses/archive/spr05/cos126/assignments/markov.html) text prediction algorithm based on a vocabulary that models 68% of unique
+    words in a 60% training data set
 
 Predictor User Interface
 ========================================================
 
 ![Shiny Application User Interface](./figures/userInterface.png)
 
-- Text Predictor User Interface:
+- [Text Predictor](https://github.com/datasciencespm/DataScienceCapstone/tree/master/shinyApplication) User Interface:
     - Step #1: Launch application by navigating to the [Shiny application URL](http://datasciencespm.shinyapps.io/EnglishLanguageTextPredictor)  
     - Step #2: Enter a text phrase into the text input box
     - Step #3: Press the "Predict Word Button"
