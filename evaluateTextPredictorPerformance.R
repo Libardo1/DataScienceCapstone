@@ -59,6 +59,8 @@ applyPredictorToTextFile <- function(predictorEvalParams,
     textFileEval[["numCorrectPredictions"]] <- 0
     textFileEval[["incorrectPredictions"]] <- character()
     
+    resultsFilePrefix <- unlist(str_split(textDataFile,"\\.txt"))[1]
+    
     repeat {
         cur_chunk <- readLines(h_conn, num_lines_to_read, skipNul=TRUE)
         
@@ -107,17 +109,16 @@ applyPredictorToTextFile <- function(predictorEvalParams,
                 textFileEval[["incorrectPredictions"]] <-
                     append(textFileEval[["incorrectPredictions"]],
                            curChunkEval[["incorrectPredictions"]])
+                
+                save(file=file.path(predictorEvalParams[["textFileDirectory"]],
+                                    paste0(resultsFilePrefix, "Eval.RData")),
+                     textFileEval)
             }
         } else {
             break
         }
     }
     close(h_conn)
-    
-    prefix <- unlist(str_split(textDataFile,"\\.txt"))[1]
-
-    save(file=file.path(predictorEvalParams[["textFileDirectory"]],
-                        paste0(prefix,"Eval.RData")), textFileEval)
     
     return(textFileEval)
 }
