@@ -9,8 +9,8 @@ Project Summary
 ========================================================
 
 - Problem statement
-    - Implement a [Shiny application](http://shiny.rstudio.com/) 
-    that predicts the next word based on a phrase entered by a user
+    - Implement a Shiny application that predicts the next word based on a 
+    phrase entered by a user
 - Challenges
     - Frequency of word occurence in text follows a [power law](http://nlp.stanford.edu/IR-book/html/htmledition/zipfs-law-modeling-the-distribution-of-terms-1.html) relationship
         - [~7K vocabulary](http://rpubs.com/mspcvsp/capstoneProjectEDA) is 
