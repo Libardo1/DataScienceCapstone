@@ -27,6 +27,7 @@ source("./sampleTextFile.R")
 source("./formLineCorpus.R")
 source("./determineTextFileSize.R")
 source("./analyzeUnigramStatistics.R")
+source("./evaluateTextPredictorPerformance.R")
 ```
 
 ```{r splitTextData}
@@ -105,8 +106,7 @@ save(file="./analyzeTransitionMatrix.RData", textPredictor,
                                              averageTranstionMatrix)
 ```
 
-```{r }
-source("./evaluateTextPredictorPerformance.R")
+```{r evaluateTextPredictorPerformance_Part1}
 load(file="./analyzeTransitionMatrix.RData")
 
 transitionMatrix <- averageTranstionMatrix[["transitionMatrix"]]
@@ -130,4 +130,100 @@ predictorEvalParams[["blackList"]] <-
 
 testDataEval <- evaluateTextPredictorPerformance(predictorEvalParams,
                                                  "*TestData.txt")
+```
+
+```{r evaluateTextPredictorPerformance_Part2}
+if (!file.exists("./OutputData/en_US/vocabularyCountAdjustment.RData")) {
+    vocabularyCountAdjustment <- list()
+    for (curName in names(vocabularyCounts)) {
+        curTestDataEval <- 
+            dir("./OutputData//en_US",
+                pattern=paste0(".*",curName,".*TestDataEval.RData"))
+        
+        load(file.path("./OutputData//en_US",curTestDataEval))
+        
+        filePrefix <- unlist(str_split(curTestDataEval,"\\.RData"))[1]
+    
+        vocabularyCountAdjustment[[filePrefix]] <- 
+            sort(table(textFileEval$incorrectPredictions), decreasing=TRUE)
+    }
+    save(file="./OutputData//en_US/vocabularyCountAdjustment.RData",
+         vocabularyCountAdjustment)    
+}
+
+vocabularyCounts <- loadVocabularyCounts("./OutputData//en_US")
+load("./OutputData//en_US/vocabularyCountAdjustment.RData")
+
+textFileEvalPrefix <- names(vocabularyCountAdjustment)
+
+for (curDocumentType in names(vocabularyCounts)) {
+    print("------------------------------------------------------------")
+    print(sprintf("Updating %s's counts", curDocumentType))
+    
+    curField <- textFileEvalPrefix[grep(paste0(".*",curDocumentType,".*"),
+                                              textFileEvalPrefix)]
+    
+    commonTerms <- colnames(vocabularyCounts[[curDocumentType]])
+    
+    curNumberTrigrams <- length(vocabularyCountAdjustment[[curField]])
+    
+    for (m in seq_len(curNumberTrigrams)) {
+        if (m %%1000 == 0) {
+            print(sprintf("    Processing trigram #%d (Out of #%d)",
+                          m, curNumberTrigrams))
+        }
+        
+        curWords <- 
+            unlist(str_split(names(vocabularyCountAdjustment[[curField]][m]),
+                             " "))
+        
+        for (n in seq(2,3)) {
+            rowIdx <- which(grepl(paste0("^",curWords[n-1],"$"),
+                                  commonTerms))
+            
+            colIdx <- which(grepl(paste0("^",curWords[n],"$"),
+                                  commonTerms))
+            
+            vocabularyCounts[[curDocumentType]][rowIdx,colIdx] <- 
+                vocabularyCounts[[curDocumentType]][rowIdx,colIdx] + 
+                vocabularyCountAdjustment[[curField]][m]
+        }
+    }
+}
+
+averageTranstionMatrix <- constructAverageTransitionMatrix(vocabularyCounts)
+
+textPredictor <- 
+    new("markovchain",
+        transitionMatrix=averageTranstionMatrix[["transitionMatrix"]])
+
+save(file="./analyzeRefinedTransitionMatrix.RData",
+     textPredictor,
+     averageTranstionMatrix)
+```
+
+```{r analyzeRefinedTransitionMatrix}
+load(file="./analyzeRefinedTransitionMatrix.RData")
+
+transitionMatrix <- averageTranstionMatrix[["transitionMatrix"]]
+save(file="./shinyApplication//transitionMatrix.RData", transitionMatrix)
+
+predictorEvalParams <- list()
+predictorEvalParams[["textPredictor"]] <- textPredictor
+rm(textPredictor)
+rm(averageTranstionMatrix)
+
+predictorEvalParams[["textFileDirectory"]] <- "./OutputData//en_US/"
+
+load(file.path(predictorEvalParams[["textFileDirectory"]],
+               "splitTextDataNumLines.RData"))
+
+predictorEvalParams[["num_lines"]] <- num_lines
+rm(num_lines)
+
+predictorEvalParams[["blackList"]] <- 
+    readBlackList("./Data/Terms-to-Block.csv")
+
+validationDataEval <- evaluateTextPredictorPerformance(predictorEvalParams,
+                                                       "*ValidationData.txt")
 ```
