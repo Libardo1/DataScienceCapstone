@@ -28,6 +28,7 @@ source("./formLineCorpus.R")
 source("./determineTextFileSize.R")
 source("./analyzeUnigramStatistics.R")
 source("./evaluateTextPredictorPerformance.R")
+source("./constructTransitionMatrix.R")
 ```
 
 ```{r splitTextData}
@@ -65,8 +66,6 @@ if (!file.exists(file.path(outputTextFileDirectory,"commonTerms.RData"))) {
 ```
 
 ```{r constructTransitionMatrix}
-source("./constructTransitionMatrix.R")
-
 outputTextFileDirectory <- "./OutputData//en_US/"
 
 load(file.path(outputTextFileDirectory,"commonTerms.RData"))
@@ -190,6 +189,8 @@ for (curDocumentType in names(vocabularyCounts)) {
         }
     }
 }
+save(file="./OutputData//en_US/refinedVocabularyCounts.RData",
+     vocabularyCounts)
 
 averageTranstionMatrix <- constructAverageTransitionMatrix(vocabularyCounts)
 
@@ -226,4 +227,45 @@ predictorEvalParams[["blackList"]] <-
 
 validationDataEval <- evaluateTextPredictorPerformance(predictorEvalParams,
                                                        "*ValidationData.txt")
+```
+
+```{r summarizePerformance}
+load(file="./OutputData//en_US/refinedVocabularyCounts.RData")
+
+outputDataPath = "./OutputData//en_US"
+
+trigramCount <- 0
+commonTrigramCount <- 0
+numCorrectPredictions <- 0
+incorrectPredictions <- character()
+
+for (curResultsFile in dir(outputDataPath,
+                           pattern="*ValidationDataEval.RData")) {
+    load(file.path(outputDataPath,curResultsFile))
+    
+    trigramCount <- trigramCount + textFileEval$trigramCount
+    commonTrigramCount <- commonTrigramCount + textFileEval$commonTrigramCount
+    
+    numCorrectPredictions <-
+        numCorrectPredictions + textFileEval$numCorrectPredictions
+    
+    incorrectPredictions <- append(incorrectPredictions,
+                                   textFileEval$incorrectPredictions)
+    
+    rm(textFileEval)
+}
+
+percentTrigramsCovered <- 100*(commonTrigramCount / trigramCount)
+predictorPerformance <- 100*(numCorrectPredictions / commonTrigramCount)
+
+vocabularyDistribution <- 
+    initializeVocabularyDistribution(vocabularyCounts)
+
+ggplot(vocabularyDistribution,aes(x=zerocounts,y=counts)) + stat_binhex() +
+    facet_wrap(~type) + theme_gray(base_size=16) + 
+    xlab("Zero Counts (Fraction of Vocabulary)") + 
+    ylab("Counts (Fraction of Voabulary)")
+
+
+
 ```

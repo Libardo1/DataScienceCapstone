@@ -7,6 +7,29 @@ font-family: 'Helvetica'
 
 Project Summary
 ========================================================
+```{r setupEnvironment, echo=FALSE}
+# http://stackoverflow.com/questions/13090838/r-markdown-avoiding-package-loading-messages
+Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre1.8.0_20')
+
+library(rJava)
+library(RWeka)
+library(R.utils)
+library(stringi)
+library(stringr)
+library(shiny)
+library(textcat)
+library(tm)
+library(markovchain)
+library(ggplot2)
+library(RColorBrewer)
+
+source("./sampleTextFile.R")
+source("./formLineCorpus.R")
+source("./determineTextFileSize.R")
+source("./analyzeUnigramStatistics.R")
+source("./evaluateTextPredictorPerformance.R")
+source("./constructTransitionMatrix.R")
+```
 
 - Problem statement
     - Implement a Shiny application that predicts the next word based on a 
@@ -34,6 +57,45 @@ Predictor User Interface
 
 Predictor Performance Analysis
 ========================================================
+```{r echo=FALSE, fig.width=12, fig.height=6}
+# https://support.rstudio.com/hc/communities/public/questions/
+#   202702586-Figure-dimensions-in-Rpres-presentations
+load(file="./OutputData//en_US/refinedVocabularyCounts.RData")
+
+outputDataPath = "./OutputData//en_US"
+
+trigramCount <- 0
+commonTrigramCount <- 0
+numCorrectPredictions <- 0
+incorrectPredictions <- character()
+
+for (curResultsFile in dir(outputDataPath,
+                           pattern="*ValidationDataEval.RData")) {
+    load(file.path(outputDataPath,curResultsFile))
+    
+    trigramCount <- trigramCount + textFileEval$trigramCount
+    commonTrigramCount <- commonTrigramCount + textFileEval$commonTrigramCount
+    
+    numCorrectPredictions <-
+        numCorrectPredictions + textFileEval$numCorrectPredictions
+    
+    incorrectPredictions <- append(incorrectPredictions,
+                                   textFileEval$incorrectPredictions)
+    
+    rm(textFileEval)
+}
+
+percentTrigramsCovered <- 100*(commonTrigramCount / trigramCount)
+predictorPerformance <- 100*(numCorrectPredictions / commonTrigramCount)
+
+vocabularyDistribution <- 
+    initializeVocabularyDistribution(vocabularyCounts)
+
+ggplot(vocabularyDistribution,aes(x=zerocounts,y=counts)) + stat_binhex() +
+    facet_wrap(~type) + theme_gray(base_size=16) + 
+    xlab("Zero Counts (Fraction of Vocabulary)") + 
+    ylab("Counts (Fraction of Voabulary)")
+```
 
 Project Conclusion
 ========================================================

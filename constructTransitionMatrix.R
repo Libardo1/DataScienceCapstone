@@ -356,29 +356,48 @@ loadVocabularyCounts <- function(textFileDirectory) {
 
 initializeVocabularyDistribution <- function(vocabularyCounts) {
     #------------------------------------------------------------------------
-    # Initializes a data frame that describes the distribution of
-    # vocabulary words across the english language training data
+    # Initializes a data frame that describes:
+    # 1.) The distribution of vocabulary words
+    # 2.) The number of zero counts for each row a Markov chain transition 
+    #     matrix
     #
     # Args:
     #   vocabularyCounts: List that contains the vocabulary counts for
     #                     the english language training data
     #
     # Returns:
-    #   vocabularyDistribution: Data frame that describes the 
-    #                           distribution of vocabulary words across 
-    #                           the english language training data
-    #------------------------------------------------------------------------    
-    blogs <- data.frame(counts=rowSums(vocabularyCounts[["blogs"]]))
+    #   vocabularyDistribution: Data frame that describes:
+    #                           1.) The distribution of vocabulary words
+    #                           2.) The number of zero counts for each row a 
+    #                               Markov chain transition matrix
+    #------------------------------------------------------------------------
+    zeroCounts <- list()
+    for (curType in names(vocabularyCounts)) {
+        zeroCounts[[curType]] <- numeric(nrow(vocabularyCounts[[curType]]))
+        
+        for (n in seq_len(nrow(vocabularyCounts[[curType]]))) {
+            zeroCounts[[curType]][n] <- 
+                sum(vocabularyCounts[[curType]][n,] == 0)
+        }
+        zeroCounts[[curType]] <- zeroCounts[[curType]] / 
+            nrow(vocabularyCounts[[curType]])
+    }
+    
+    
+    blogs <- data.frame(counts=rowSums(vocabularyCounts[["blogs"]]),
+                        zerocounts=zeroCounts[["blogs"]])
     blogs$type <- "blogs"
     blogs$vocabularyindex <- seq(1,nrow(blogs))
     rownames(blogs) <- NULL
     
-    twitter <- data.frame(counts=rowSums(vocabularyCounts[["twitter"]]))
+    twitter <- data.frame(counts=rowSums(vocabularyCounts[["twitter"]]),
+                          zerocounts=zeroCounts[["twitter"]])
     twitter$type <- "twitter"
     twitter$vocabularyindex <- seq(1,nrow(twitter))
     rownames(twitter) <- NULL
     
-    news <- data.frame(counts=rowSums(vocabularyCounts[["news"]]))
+    news <- data.frame(counts=rowSums(vocabularyCounts[["news"]]),
+                       zerocounts=zeroCounts[["news"]])
     news$type <- "news"
     news$vocabularyindex <- seq(1,nrow(news))
     rownames(news) <- NULL
