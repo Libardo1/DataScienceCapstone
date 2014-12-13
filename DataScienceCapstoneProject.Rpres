@@ -55,9 +55,23 @@ Predictor User Interface
     - Step #3: Press the "Predict Word Button"
 
 
-Predictor Performance Analysis
+Predictor Training & Testing Approach
 ========================================================
-```{r echo=FALSE, fig.width=12, fig.height=6}
+
+- Predictor training & testing approach
+    - Count number of trigrams that are contained in a vocabulary
+    - Each trigram is composed of two Markov chain state transitions
+    - Compute average number of state transitions across English language 
+    training data 
+    - Refine transition matrix based on 20% test data
+    - Evaluate predictor performance using 20% validation data
+    
+- [Text model training R script](https://github.com/datasciencespm/DataScienceCapstone/blob/master/constructTextModel.Rmd)
+
+Project Conclusion
+========================================================
+
+```{r echo=FALSE, fig.width=10, fig.height=3}
 # https://support.rstudio.com/hc/communities/public/questions/
 #   202702586-Figure-dimensions-in-Rpres-presentations
 load(file="./OutputData//en_US/refinedVocabularyCounts.RData")
@@ -85,17 +99,26 @@ for (curResultsFile in dir(outputDataPath,
     rm(textFileEval)
 }
 
-percentTrigramsCovered <- 100*(commonTrigramCount / trigramCount)
-predictorPerformance <- 100*(numCorrectPredictions / commonTrigramCount)
+percentTrigramsCovered <- round(100*(commonTrigramCount / trigramCount),1)
+
+predictorPerformance <- 
+    round(100*(numCorrectPredictions / commonTrigramCount),1)
 
 vocabularyDistribution <- 
     initializeVocabularyDistribution(vocabularyCounts)
 
 ggplot(vocabularyDistribution,aes(x=zerocounts,y=counts)) + stat_binhex() +
-    facet_wrap(~type) + theme_gray(base_size=16) + 
+    facet_wrap(~type) + theme_gray(base_size=12) + 
     xlab("Zero Counts (Fraction of Vocabulary)") + 
     ylab("Counts (Fraction of Voabulary)")
 ```
 
-Project Conclusion
-========================================================
+- <small style="font-size:.7em">Validation data set analysis suggests `r percentTrigramsCovered` percent 
+trigrams were covered by the training data set vocabulary</small>
+    - <small style="font-size:.7em">`r predictorPerformance` % of validation data set triagram last words were 
+    correctly predicted</small>
+- <small style="font-size:.7em">Zero-Counts/Counts scatter plots suggest that there are a significant number of missing values in the transition matrix</small>
+    - <small style="font-size:.7em">Consistent with low predictor performance</small>
+- <small style="font-size:.7em">Proposed solution to improve predictor performance</small>
+    - <small style="font-size:.7em">Evaluate training the Markov chain transition matrix using [Apache Hadoop](http://hadoop.apache.org/)</small>
+        - <small style="font-size:.7em">[Real-Time Fraud Detection with Sequence Mining](https://pkghosh.wordpress.com/2013/10/21/real-time-fraud-detection-with-sequence-mining/)</small>
