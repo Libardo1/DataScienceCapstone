@@ -265,7 +265,4 @@ ggplot(vocabularyDistribution,aes(x=zerocounts,y=counts)) + stat_binhex() +
     facet_wrap(~type) + theme_gray(base_size=16) + 
     xlab("Zero Counts (Fraction of Vocabulary)") + 
     ylab("Counts (Fraction of Voabulary)")
-
-
-
 ```

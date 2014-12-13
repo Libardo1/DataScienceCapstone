@@ -1,6 +1,6 @@
-JHU Data Science Specialization Capstone Project
+JHU Data Science Coursera Specialization Capstone Project
 ========================================================
-author: datasciencespm
+author: mspcvsp
 date: December 14, 2014
 transition: rotate
 font-family: 'Helvetica'
@@ -71,7 +71,7 @@ Predictor Training & Testing Approach
 Project Conclusion
 ========================================================
 
-```{r echo=FALSE, fig.width=10, fig.height=3}
+```{r echo=FALSE, fig.width=10, fig.height=3, fig.align='center'}
 # https://support.rstudio.com/hc/communities/public/questions/
 #   202702586-Figure-dimensions-in-Rpres-presentations
 load(file="./OutputData//en_US/refinedVocabularyCounts.RData")
