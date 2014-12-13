@@ -31,42 +31,39 @@ source("./evaluateTextPredictorPerformance.R")
 source("./constructTransitionMatrix.R")
 ```
 
-- Problem statement
-    - Implement a Shiny application that predicts the next word based on a 
-    phrase entered by a user
-- Challenges
-    - Frequency of word occurence in text follows a [power law](http://nlp.stanford.edu/IR-book/html/htmledition/zipfs-law-modeling-the-distribution-of-terms-1.html) relationship
-        - [~7K vocabulary](http://rpubs.com/mspcvsp/capstoneProjectEDA) is 
+- <small style="font-size:.7em">Problem statement</small>
+    - <small style="font-size:.7em">Implement a Shiny application that predicts the next word based on a 
+    phrase entered by a user</small>
+- <small style="font-size:.7em">Challenges</small>
+    - <small style="font-size:.7em">Frequency of word occurence in text follows a [power law](http://nlp.stanford.edu/IR-book/html/htmledition/zipfs-law-modeling-the-distribution-of-terms-1.html) relationship</small>
+        - <small style="font-size:.7em">[~7K vocabulary](http://rpubs.com/mspcvsp/capstoneProjectEDA) is 
         required to model 90% of unique words contained in 1% of project text 
-        data
-    - [Limited memory](https://groups.google.com/forum/#!msg/shiny-discuss/IFpkIuPTVRU/P3D4AuNRkUAJ) available for a deployed Shiny application
-- Solution
-    - Implement [Markov chain](http://www.cs.princeton.edu/courses/archive/spr05/cos126/assignments/markov.html) text prediction algorithm based on a vocabulary that models 68% of unique
-    words in a 60% training data set
+        data</small>
+    - <small style="font-size:.7em">[Limited memory](https://groups.google.com/forum/#!msg/shiny-discuss/IFpkIuPTVRU/P3D4AuNRkUAJ) available for a deployed Shiny application</small>
+- <small style="font-size:.7em">Solution</small>
+    - <small style="font-size:.7em">Implement [Markov chain](http://www.cs.princeton.edu/courses/archive/spr05/cos126/assignments/markov.html) text prediction algorithm based on a vocabulary that models 68% of unique
+    words in a 60% training data set</small>
 
 Predictor User Interface
 ========================================================
 
 ![Shiny Application User Interface](./figures/userInterface.png)
 
-- [Text Predictor](https://github.com/datasciencespm/DataScienceCapstone/tree/master/shinyApplication) User Interface:
-    - Step #1: Launch application by navigating to the [Shiny application URL](http://datasciencespm.shinyapps.io/EnglishLanguageTextPredictor)  
-    - Step #2: Enter a text phrase into the text input box
-    - Step #3: Press the "Predict Word Button"
-
+- <small style="font-size:.6em">[Text Predictor](https://github.com/datasciencespm/DataScienceCapstone/tree/master/shinyApplication) User Interface:</small>
+    - <small style="font-size:.6em">Step #1: Launch application by navigating to the [Shiny application URL](http://datasciencespm.shinyapps.io/EnglishLanguageTextPredictor)</small>
+    - <small style="font-size:.6em">Step #2: Enter a text phrase into the text input box</small>
+    - <small style="font-size:.6em">Step #3: Press the "Predict Word Button"</small>
 
 Predictor Training & Testing Approach
 ========================================================
-
-- Predictor training & testing approach
-    - Count number of trigrams that are contained in a vocabulary
-    - Each trigram is composed of two Markov chain state transitions
-    - Compute average number of state transitions across English language 
-    training data 
-    - Refine transition matrix based on 20% test data
-    - Evaluate predictor performance using 20% validation data
-    
-- [Text model training R script](https://github.com/datasciencespm/DataScienceCapstone/blob/master/constructTextModel.Rmd)
+- <small style="font-size:.7em">Predictor training & testing approach</small>
+    - <small style="font-size:.7em">Count number of trigrams that are contained in a vocabulary</small>
+    - <small style="font-size:.7em">Each trigram is composed of two Markov chain state transitions</small>
+    - <small style="font-size:.7em">Compute average number of state transitions across English language training data</small>
+    - <small style="font-size:.7em">Refine transition matrix based on 20% test 
+    data</small>
+    - <small style="font-size:.7em">Evaluate predictor performance using 20% validation data</small>
+- <small style="font-size:.7em">[Text model training R script](https://github.com/datasciencespm/DataScienceCapstone/blob/master/constructTextModel.Rmd)</small>  
 
 Project Conclusion
 ========================================================
@@ -113,12 +110,9 @@ ggplot(vocabularyDistribution,aes(x=zerocounts,y=counts)) + stat_binhex() +
     ylab("Counts (Fraction of Voabulary)")
 ```
 
-- <small style="font-size:.7em">Validation data set analysis suggests `r percentTrigramsCovered` percent 
-trigrams were covered by the training data set vocabulary</small>
-    - <small style="font-size:.7em">`r predictorPerformance` % of validation data set triagram last words were 
-    correctly predicted</small>
+- <small style="font-size:.7em">Validation data set analysis suggests `r percentTrigramsCovered` percent trigrams were covered by the training data set vocabulary</small>
+    - <small style="font-size:.6em">`r predictorPerformance` % of validation data set triagram last words were correctly predicted</small>
 - <small style="font-size:.7em">Zero-Counts/Counts scatter plots suggest that there are a significant number of missing values in the transition matrix</small>
-    - <small style="font-size:.7em">Consistent with low predictor performance</small>
+    - <small style="font-size:.6em">Consistent with low predictor performance</small>
 - <small style="font-size:.7em">Proposed solution to improve predictor performance</small>
-    - <small style="font-size:.7em">Evaluate training the Markov chain transition matrix using [Apache Hadoop](http://hadoop.apache.org/)</small>
-        - <small style="font-size:.7em">[Real-Time Fraud Detection with Sequence Mining](https://pkghosh.wordpress.com/2013/10/21/real-time-fraud-detection-with-sequence-mining/)</small>
+    - <small style="font-size:.6em">Evaluate training the Markov chain transition matrix using [Apache Hadoop](https://pkghosh.wordpress.com/2013/10/21/real-time-fraud-detection-with-sequence-mining)</small>
