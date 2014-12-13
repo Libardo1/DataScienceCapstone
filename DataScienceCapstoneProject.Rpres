@@ -63,7 +63,7 @@ Predictor Training & Testing Approach
     - <small style="font-size:.7em">Refine transition matrix based on 20% test 
     data</small>
     - <small style="font-size:.7em">Evaluate predictor performance using 20% validation data</small>
-- <small style="font-size:.7em">[Text model training R script](https://github.com/datasciencespm/DataScienceCapstone/blob/master/constructTextModel.Rmd)</small>  
+- <small style="font-size:.7em">[Text model training & testing R script](https://github.com/datasciencespm/DataScienceCapstone/blob/master/constructTextModel.Rmd)</small>  
 
 Project Conclusion
 ========================================================
@@ -113,6 +113,6 @@ ggplot(vocabularyDistribution,aes(x=zerocounts,y=counts)) + stat_binhex() +
 - <small style="font-size:.7em">Validation data set analysis suggests `r percentTrigramsCovered` percent trigrams were covered by the training data set vocabulary</small>
     - <small style="font-size:.6em">`r predictorPerformance` % of validation data set triagram last words were correctly predicted</small>
 - <small style="font-size:.7em">Zero-Counts/Counts scatter plots suggest that there are a significant number of missing values in the transition matrix</small>
-    - <small style="font-size:.6em">Consistent with low predictor performance</small>
+    - <small style="font-size:.6em">Consistent with poor predictor performance</small>
 - <small style="font-size:.7em">Proposed solution to improve predictor performance</small>
     - <small style="font-size:.6em">Evaluate training the Markov chain transition matrix using [Apache Hadoop](https://pkghosh.wordpress.com/2013/10/21/real-time-fraud-detection-with-sequence-mining)</small>
